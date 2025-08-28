@@ -1042,7 +1042,7 @@ app.get("/", (req, res) => {
      res.sendFile(path.join(__dirname,  '404.html'));
    });
 
-app.listen(4000,()=>{
+app.listen(80,()=>{
   console.log("server works")
 })
 
