@@ -40,6 +40,9 @@ body {
   font-weight: bold;
   border-bottom: 2px solid #ffe600;
 }
+.btn-outline-primary{
+  color: #e9eef6;
+}
 
 /* زر التسجيل */
 .regist {
@@ -156,4 +159,25 @@ footer h4 a:hover {
    z-index: 99999;
    transition: width 0.15s ease-out;
  }
- 
+     .blue-btn {
+       background-color: #007bff;
+       /* أزرق */
+       color: #fff;
+       /* أبيض */
+       border: none;
+       padding: 10px 20px;
+       border-radius: 8px;
+       font-size: 16px;
+       cursor: pointer;
+       transition: 0.3s;
+     }
+  
+     .blue-btn:hover {
+       background-color: #0056b3;
+       /* أزرق أغمق عند الهوفر */
+     }
+  
+     .btn-wrapper a {
+       text-decoration: none;
+       margin-right: 10px;
+     }

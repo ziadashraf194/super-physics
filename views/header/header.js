@@ -153,10 +153,12 @@ window.onload = async function () {
     regist.innerHTML = buttonsHTML;
 
   } else {
-    regist.innerHTML = `
-      <a href="/register/index.html"><button type="button" class="btn btn-outline-primary">إنشاء حساب</button></a>
-      <a href="/login/index.html"><button type="button" class="btn btn-outline-secondary">تسجيل الدخول</button></a>
-    `;
+     regist.innerHTML = `
+    <div class="btn-wrapper">
+      <a href="/register/index.html"><button type="button" class="blue-btn">إنشاء حساب</button></a>
+      <a href="/login/index.html"><button type="button" class="blue-btn">تسجيل الدخول</button></a>
+    </div>
+  `;
   }
 };
 
