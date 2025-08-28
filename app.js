@@ -1042,8 +1042,9 @@ app.get("/", (req, res) => {
      res.sendFile(path.join(__dirname,  '404.html'));
    });
 
-app.listen(80,()=>{
-  console.log("server works")
+   port= 80
+app.listen(port,()=>{
+  console.log(`server works${port}`)
 })
 
 
