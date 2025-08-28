@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الامتحانات</title>
+    <style>
+        #quizzesContainer{
+            direction: rtl;
+            padding: 15px;
+            align-self: center;
+            width: 90%;
+            box-shadow: 11px 8px 0px rgb(0, 94, 255);
+            margin: auto;
+            border: 1px solid rgb(0, 94, 255);
+            border-radius: 10px;
+        }
+        .quiz{
+            border: dashed 2px rgb(0, 94, 255) ;
+            padding: 10px;
+            box-shadow: 4px 4px 5px 0px rgb(0 0 0 / 26%);
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn-lg{
+          width: 90%;
+          margin: 10px;
+          margin-left: 5.5%;
+        }
+        .div{
+          display: flex;
+          justify-content: end;
+        }
+        .btn-outline-secondary{
+          display: flex;
+          position: absolute;
+          z-index: 999;
+        }
+    </style>
+</head>
+<body >
+    <div id="header"></div>
+
+    <h2 style="color: rgb(0, 94, 255);margin-top: 40px;text-align: center;">قائمة الاختبارات</h2>
+    <button type="button" class="btn btn-primary btn-lg btn-block"  onclick="window.location.href='/admin/addQuiz.html'">اضافة اختبار جديد</button>
+
+<div id="quizzesContainer">جارٍ تحميل البيانات...</div>
+
+<script>
+  const token = localStorage.getItem('token'); // احرص أن يكون التوكن محفوظ في localStorage
+
+  async function fetchQuizzes() {
+    const container = document.getElementById('quizzesContainer');
+    container.innerHTML = "جارٍ تحميل البيانات...";
+
+    try {
+      const response = await fetch("/quizzes", {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      if (!response.ok) {
+        container.innerHTML = "حدث خطأ: " + response.status;
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!data.quizzes || data.quizzes.length === 0) {
+        container.innerHTML = "لا يوجد اختبارات حالياً";
+        return;
+      }
+       
+      container.innerHTML = ""; // تنظيف الحاوية قبل العرض
+
+      data.quizzes.forEach(quiz => {
+        const quizDiv = document.createElement('div');
+        quizDiv.className = "quiz";
+        
+        let html = `<h3>${quiz.title}</h3>
+      <a href="/admin/result.html?id=${quiz._id}">   <div class="div" ><button type="button" onclick="window.location.href=''" class="btn btn-outline-secondary">نتيجة الاختبار</button></div></a>
+                   <p>وقت الامتحان: ${quiz.exam_duration} دقيقة</h3>
+                    <p>عدد الاسإلة: ${quiz.questions.length} سوأل</h3>
+                     
+        `;
+   
+        quizDiv.onclick =  ()=>{      window.location.href=`/admin/editQuiz.html?id=${quiz._id}` }
+        quizDiv.innerHTML = html;
+        container.appendChild(quizDiv);
+      });
+
+    } catch (err) {
+      container.innerHTML = "حدث خطأ أثناء جلب البيانات: " + err.message;
+    }
+  }
+
+  fetchQuizzes();
+
+</script>
+    <div id="footer"></div>
+    <script src="/header/header.js"></script>
+    <script>
+              async function init() {
+          const token = localStorage.getItem('token'); 
+      
+          function parseJwt(token) {
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+              );
+              return JSON.parse(jsonPayload);
+            } catch (e) {
+              console.error('خطأ في فك التوكن:', e);
+              return null;
+            }
+          }
+      
+          const userId = token ? parseJwt(token)?.id : null;
+          
+      
+          async function checkAdmin() {
+            if (!userId) return false;
+      
+            try {
+              const response = await fetch(`/api/verify/admin/${userId}`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                }
+              });
+      
+              let data;
+              try {
+                data = await response.json();
+              } catch(e) {
+                console.error("الرد ليس JSON:", await response.text());
+                return false;
+              }
+      
+              if (response.ok) {
+                return data.isAdmin === true;
+              } else {
+                return false;
+              }
+            } catch (err) {
+              console.error("فشل الاتصال بالسيرفر", err);
+              return false;
+            }
+          }
+      
+          const isAdmin = await checkAdmin();
+          if (!isAdmin) {
+            window.location.href = "/404.html";
+          }
+        }
+      
+        init();
+    </script>
+</body>
+</html>

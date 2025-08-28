@@ -1,0 +1,23 @@
+{
+  "exam_duration": 0.5,
+  "title": "اختبار HTML",
+  "contant": "",
+  "questions": [
+    {
+      "title": "ما هي لغة تصميم صفحات الويب؟",
+      "answer_1": "HTML",
+      "answer_2": "CSS",
+      "answer_3": "JavaScript",
+      "answer_4": "Python",
+      "right_answer": "HTML"
+    },
+    {
+      "title": "أي وسم يستخدم لإدراج صورة في HTML؟",
+      "answer_1": "<div>",
+      "answer_2": "<span>",
+      "answer_3": "<img>",
+      "answer_4": "<p>",
+      "right_answer": "<img>"
+    }
+  ]
+}

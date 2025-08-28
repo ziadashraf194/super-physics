@@ -1,0 +1,114 @@
+/* Reset أساسي */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+  direction: rtl;
+}
+
+/* حاوية الفيديو */
+.video {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: 30px 20px;
+  width: 100%;
+  margin: auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* العنوان */
+#video-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #007bff, #00b7ff);
+  padding: 12px 24px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+}
+
+/* صندوق الفيديو */
+.video-box {
+  position: relative;
+  width: 100%;
+  max-width: 70%;
+  height: 60vh;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #007bff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.video-box iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* عناصر شفافة فوق الفيديو */
+.div1,
+.div2 {
+  background-color: rgba(255, 0, 0, 0);
+  position: absolute;
+  z-index: 10;
+}
+
+.div1 {
+  height: 70px;
+  width: 63%;
+  top: 23%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.div2 {
+  height: 45px;
+  width: 12%;
+  bottom: 5%;
+  right: 18%;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .video-box {
+    max-width: 95%;
+    height: 40vh;
+  }
+
+  .div1 {
+    width: 92%;
+    top: 20%;
+  }
+
+  .div2 {
+    width: 20%;
+    bottom: 4%;
+    right: 4%;
+  }
+}
+
+@media (min-width: 800px) and (max-width: 1200px) {
+  .video-box {
+    max-width: 90%;
+    height: 50vh;
+  }
+
+  .div1 {
+    width: 85%;
+  }
+
+  .div2 {
+    width: 15%;
+    right: 7%;
+  }
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نتائج الكويز</title>
+  <style>
+     table {
+      border-collapse: collapse;
+      width: 85%;
+      margin: 20px auto;
+      text-align: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      direction: rtl;
+    }
+
+    thead th {
+      background: #0091ff;
+      color: #fff;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 15px;
+    }
+
+    tr:hover {
+      background: #f1f9ff;
+    }
+  </style>
+</head>
+<body>
+  <div id="header"></div>
+  <div id="results"></div>
+  <div id="footer"></div>
+
+  <script src="/header/header.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const quizId = params.get("id");
+
+    async function fetchQuizResult(quizID) {
+      try {
+       
+
+        const response = await fetch(`/result?quizID=${quizID}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+          throw new Error(`خطأ في الطلب: ${response.status}`);
+        }
+
+        const data = await response.json();
+       
+        displayResults(data);
+      } catch (error) {
+        console.error("❌ فشل في جلب البيانات:", error.message);
+        document.getElementById("results").innerText = "حدث خطأ أثناء جلب النتائج.";
+      }
+    }
+
+    function displayResults(results) {
+  if (!results || results.length === 0) {
+    document.getElementById("results").innerText = "لا توجد نتائج لعرضها.";
+    return;
+  }
+
+  // ترتيب النتائج: الدرجة من الأعلى، وإذا تساوت حسب التاريخ من الأقدم
+  results.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score; // ترتيب حسب الدرجة من الأعلى
+    } else {
+      return new Date(a.date) - new Date(b.date); // ترتيب حسب الوقت من الأقدم
+    }
+  });
+
+  // إنشاء جدول
+  let table = document.createElement("table");
+  let thead = document.createElement("thead");
+  let tbody = document.createElement("tbody");
+
+  // رأس الجدول
+  thead.innerHTML = `
+    <tr>
+      <th>الرقم</th>
+      <th>اسم المستخدم</th>
+      <th>الدرجة</th>
+      <th>تاريخ</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+
+  results.forEach((item, index) => {
+  let row = document.createElement("tr");
+  
+ 
+  row.style.cursor = "pointer"; 
+  row.onclick = () => {
+    window.location.href = `/admin/userQuiz.html?quizId=${quizId}&id=${item.studentId._id}`;
+  };
+  
+  row.innerHTML = `
+    <td>${index + 1}</td>
+    <td>${item.studentId.name || "غير معروف"}</td>
+    <td>${item.score || 0}</td>
+    <td>${item.date ? new Date(item.date).toLocaleString() : "-"}</td>
+  `;
+  
+  tbody.appendChild(row);
+});
+
+  table.appendChild(tbody);
+
+  // إضافة الجدول للـ div
+  document.getElementById("results").appendChild(table);
+}
+
+    fetchQuizResult(quizId);
+  </script>
+</body>
+</html>

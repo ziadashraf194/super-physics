@@ -1,0 +1,127 @@
+*{
+   
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .contant {
+    position: absolute;
+     top: 50%;
+      left: 50%;
+       transform: translate(-50%, -50%);
+       width: 80%;
+       background-color: whitesmoke;
+       padding: 20px;
+       border-radius: 8px;
+       height: 80vh;
+       box-shadow: 6px 7px 0px 1px rgb(70, 121, 222);
+       display: flex;
+       justify-content: center; 
+       align-items: center;     
+       justify-content: space-around;
+       flex-direction: row-reverse;
+       padding: 50px;
+     
+  }
+  
+  
+  form{
+    display: inline-block;
+    justify-items: center;
+  }
+  h2{
+    background-color:rgb(70, 121, 222) ;
+    padding: 10px;
+    color: #ffffff;
+    border-radius: 50px;
+  }
+  input,select{
+    height: 40px;
+  width: 100%;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border-color 0.3s;
+   
+  }
+  input:focus{
+    
+    transform: scale(1.0);
+    border: solid rgb(70, 121, 222);
+    outline: none;
+   
+  }
+  input[name="tel"] {
+    width: 100%;
+  
+  }
+  select[name="grad"] {
+    width: 100%;
+    height: 40px;
+  
+    border-radius: 5px;
+  }
+  button{
+    width: 100%;
+    height: 60px;
+    margin-top: 30px;
+    border-radius: 5px;
+    background-color: rgba(240, 248, 255, 0);
+    border: solid rgb(16, 85, 223);
+    color: rgb(16, 85, 223);
+    cursor: pointer;
+    align-items: center;
+    align-contant: center;
+    font-size: 18px;
+  }
+  button:hover,button:focus{
+    transition: .1s;
+    transform: scale(1.07);
+    border: solid rgb(70, 121, 222);
+    outline: none;
+    background-color: rgb(70, 121, 222);
+    color: #ffffff;
+  }
+  button:hover{
+    transition: .5s
+  }
+  img{
+    width: 700px;
+    height: 700px;
+  }
+  h4{
+    background-color: rgb(253, 192, 192);
+    width: 100%;
+    height: 60px;
+    text-align: center;
+    align-contant: center;
+    font-size: 20px;
+    border-radius: 10px;
+    border: solid red;
+    color: #ff0000 ;
+    font-weight: bolder;
+    display: none;
+    margin: 0px;
+  }
+  
+  
+  @media (max-width: 950px) {
+  img{
+    display: none;
+  }
+  }
+   @media(min-width: 950px) and (max-width:1300px){
+    img{
+      width: 500px;
+      height: 500px;
+    }
+    } 
+    /* @media(min-width: 600px) and (max-width:1200px){
+      img{
+        
+          width: 400px;
+          height: 500px;
+      
+      }
+      } */

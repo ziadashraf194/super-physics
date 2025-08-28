@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="contant">
+    <form id="loginForm">
+      <h2>تسجيل الدخول</h2>
+      <input type="tel" name="tel" placeholder="رقم الهاتف" required /><br/>
+      <input type="password" name="password" placeholder="كلمة المرور" required />
+      <h4 id="errorViewer"></h4>
+      <a href="/register/index.html" style="color: rgb(70, 121, 222);">إنشاء حساب</a>
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+    <img src="/imge/SignIn.svg" alt="">
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const errorViewer = document.getElementById("errorViewer");
+
+    async function checkToken() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          window.location.href = "/home/home.html";
+        } else {
+          localStorage.removeItem("token");
+        }
+      } catch (err) {
+        console.error("خطأ في التحقق من التوكن", err);
+        localStorage.removeItem("token");
+      }
+    }
+
+    checkToken(); 
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {
+        tel: formData.get("tel"),
+        password: formData.get("password")
+      };
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          errorViewer.innerText = result.message || "حدث خطأ أثناء تسجيل الدخول";
+          errorViewer.style.display = "block";
+          return;
+        }
+
+        localStorage.setItem("token", result.token);
+        window.location.href = "/home/home.html";
+
+      } catch (err) {
+        errorViewer.innerText = "حدث خطأ في الاتصال بالسيرفر";
+        errorViewer.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" contant="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="courses.css">
+    <title>كل الكورسات</title>
+</head>
+<body>
+    <style>
+        .card-deck {
+  display: flex;
+  flex-wrap: wrap; 
+  gap: 10px; 
+  justify-content: start;
+  
+.card {
+  flex: 1 1 250px; 
+  min-width: 150px;
+  max-width: 300px;
+min-height: fit-contant;
+}}
+.card-deck-text{
+    text-align: center;
+    margin: 40px;
+}
+
+    </style>
+      
+    <div id="header"  ></div>
+<button type="button" id="openPopup" class="btn btn-primary btn-lg btn-block"> <i class="fa-solid fa-plus" style="color: #ffffff;"></i>اضافة كورس جديد  </button>
+
+<div id="courseModal" class="modal">
+    <div class="modal-content">
+      <span id="closePopup" class="close">&times;</span>
+      <h2>إضافة كورس جديد</h2>
+      <form id="courseForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>عنوان الكورس</label>
+          <input type="text" name="title" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>الوصف</label>
+          <textarea name="description" required class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+          <label>السعر</label>
+          <input type="number" name="price" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label>الصورة</label>
+          <input type="file" name="image" accept="image/*" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-success">حفظ الكورس </button>
+      </form>
+    </div>
+  </div>
+
+      <h2 class="card-deck-text">جميع الكورسات</h2>
+
+
+
+    <div class="card-deck"></div>
+
+
+    <div id="footer"></div>
+
+    <script>
+        async function init() {
+          const token = localStorage.getItem('token'); 
+      
+          function parseJwt(token) {
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+              );
+              return JSON.parse(jsonPayload);
+            } catch (e) {
+              console.error('خطأ في فك التوكن:', e);
+              return null;
+            }
+          }
+      
+          const userId = token ? parseJwt(token)?.id : null;
+         
+      
+          async function checkAdmin() {
+            if (!userId) return false;
+      
+            try {
+              const response = await fetch(`/api/verify/admin/${userId}`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                }
+              });
+      
+              let data;
+              try {
+                data = await response.json();
+              } catch(e) {
+                console.error("الرد ليس JSON:", await response.text());
+                return false;
+              }
+      
+              if (response.ok) {
+                return data.isAdmin === true;
+              } else {
+                return false;
+              }
+            } catch (err) {
+              console.error("فشل الاتصال بالسيرفر", err);
+              return false;
+            }
+          }
+      
+          const isAdmin = await checkAdmin();
+          if (!isAdmin) {
+            window.location.href = "/404.html";
+          }
+        }
+      
+        // تشغيل الدالة
+        init();
+      </script>
+    <script>
+    
+        cardDeck = document.querySelector(".card-deck")
+    
+        async function checkToken() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+      
+            try {
+              const res = await fetch("/api/verify", {
+                method: "POST",
+                headers: {
+                  "contant-Type": "application/json",
+                  "Authorization": `Bearer ${token}`
+                }
+              });
+      
+              if (res.ok) {
+             (token)
+             
+               
+              } else {
+               
+                localStorage.removeItem("token");
+                window.location.href = "/login/index.html";
+    
+              }
+            } catch (err) {
+              console.error("خطأ في التحقق من التوكن", err);
+              localStorage.removeItem("token");
+            }
+          }
+      
+          checkToken(); 
+    
+    
+          async function fetchCourses() {
+        try {
+          const response = await fetch('/api/courses'); 
+          const courses = await response.json();
+     
+    for (let i = 0; i < courses.length; i++) {
+      cardDeck.innerHTML +=`
+      
+    
+    
+    
+    <a href="/admin/oneCourse.html?id=${courses[i]._id}">
+    <div class="card">
+   
+     <div class="tilt">
+      <div class="img"><img src="/${courses[i].image}" alt=""></div>
+     </div>
+     <div class="info">
+     
+      <h2 class="title">${courses[i].title}</h2>
+      <p class="desc">${courses[i].description}</p>
+      <div class="bottom">
+       <div class="price">
+      
+        <span class="new">${courses[i].price} LE</span>
+       </div>
+      </div>
+     
+      </div>
+       </a>
+     </div>
+    </div>
+   
+      `
+      
+    }
+    
+    
+          
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    
+      fetchCourses();
+      const modal = document.getElementById("courseModal");
+const openBtn = document.getElementById("openPopup");
+const closeBtn = document.getElementById("closePopup");
+const courseForm = document.getElementById("courseForm");
+
+// فتح المودال
+openBtn.onclick = () => {
+  modal.style.display = "block";
+};
+
+// إغلاق المودال
+closeBtn.onclick = () => {
+  modal.style.display = "none";
+};
+
+// إغلاق بالضغط خارج المودال
+window.onclick = (e) => {
+  if (e.target === modal) modal.style.display = "none";
+};
+
+// إرسال البيانات إلى السيرفر
+courseForm.onsubmit = async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(courseForm);
+
+  try {
+    const response = await fetch("/courses", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      alert("✅ تم حفظ الكورس بنجاح");
+      modal.style.display = "none";
+      courseForm.reset();
+    } else {
+      alert("❌ حدث خطأ: " + data.error || "فشل الحفظ");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("⚠️ فشل الاتصال بالسيرفر");
+  }
+};
+
+      </script>
+    </script>  
+        <script src="/header/header.js"></script>
+</body>
+</html>

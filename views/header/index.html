@@ -1,0 +1,67 @@
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" contant="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/home/home.html"><img class="Logo" src="/Logo.jpg" alt=""></a>
+        <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button> -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item active">
+              <a class="nav-link" href="/home/home.html">الرئيسية</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/home/allCourses.html">الكورسات</a>
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link"  href="#">Pricing</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" href="#">Disabled</a>
+            </li> -->
+          </ul>
+        </div>
+        <div class="regist" id="regist">
+          <a href="/register/index.html"> <button type="button"  class="btn btn-outline-primary" >إنشاء حساب</button></a>
+            <a href="/login/index.html" ><button type="button" class="btn btn-outline-secondary">تسجيل الدخول</button></a>
+
+        </div>
+      </nav>
+      
+      <footer>
+<h4>Developed by <a href="">Ziad Ashraf  <i class="fa-regular fa-heart fa-flip"></i></a></h4>
+      </footer>
+<script>
+
+  
+
+  // تنفيذ عند تحميل الصفحة
+  window.onload = function () {
+    let regist = document.getElementById("regist");
+    if (localStorage.getItem("token")) {
+      regist.innerHTML = `
+        <button type="button" class="btn btn-outline-danger" onclick="logout()">تسجيل الخروج</button>
+      `;
+    }
+  };
+  
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.clear();       
+  sessionStorage.clear();
+   location.reload(); 
+  }
+
+</script>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+</body>

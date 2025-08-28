@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إنشاء اختبار جديد</title>
+  <style>
+    body {
+      font-family: "Cairo", sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+
+    form {
+      direction: rtl;
+      margin: 30px auto;
+      padding: 25px 20px;
+      max-width: 700px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #0062ff;
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    input, select {
+      height: 45px;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      transition: all 0.3s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input:focus, select:focus {
+      border-color: #4679de;
+      outline: none;
+      box-shadow: 0 0 4px rgba(70, 121, 222, 0.5);
+    }
+
+    img {
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      max-width: 100%;
+    }
+
+    fieldset {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      background: #fafafa;
+    }
+
+    legend {
+      font-weight: bold;
+      color: #0062ff;
+      padding: 0 10px;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #0062ff;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #004bcc;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .delete-btn {
+      background: #dc3545;
+      color: #fff;
+      margin-top: 10px;
+    }
+
+    .delete-btn:hover {
+      background: #b52a37;
+    }
+  </style>
+</head>
+<body>
+    <div id="header"></div>
+  <form id="createQuizForm">
+    <h2 style="text-align: center; color: rgb(0, 98, 255);">إنشاء اختبار جديد</h2>
+
+    <label>العنوان:</label>
+    <input type="text" id="title" name="title" required /><br />
+
+    <input type="hidden" id="type" name="type" value="quiz" />
+
+    <label>مدة الامتحان (دقيقة):</label>
+    <input type="number" id="exam_duration" name="exam_duration" /><br />
+
+    <label>اختر الكورس</label>
+    <select name="courseId" id="courseId" class="courseIdSelect"></select><br />
+
+    <div id="questionsContainer"></div>
+
+    <button type="button" onclick="addQuestion()" class="btn btn-success btn-lg btn-block" >➕ إضافة سؤال جديد</button><br /><br />
+    <button type="submit" class="btn btn-primary btn-lg btn-block" >💾 حفظ الاختبار</button>
+  </form>
+  <div id="footer"></div>
+  <script src="/header/header.js"></script>
+  <script>
+    const token = localStorage.getItem("token");
+    courseIdSelect =document.querySelector(".courseIdSelect")
+   // const courseId = document.getElementById('courseId').value
+
+    async function fetchCourses() {
+        try {
+          const response = await fetch('/api/courses'); 
+          const courses = await response.json();
+        
+    for (let i = 0; i < courses.length; i++) {
+        courseIdSelect.innerHTML +=`
+<option value="${courses[i]._id}">${courses[i].title}</option>
+`
+
+      
+    }
+    
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    
+      fetchCourses();
+      const courseId = courseIdSelect.value
+
+    let quiz = JSON.parse(localStorage.getItem("tempQuiz")) || { questions: [] };
+
+    function saveToLocal() {
+      localStorage.setItem("tempQuiz", JSON.stringify(quiz));
+    }
+
+    function updateQuizFromInputs() {
+      quiz.questions.forEach((q, index) => {
+        q.answer_1 = document.querySelector(`[name=answer_1_${index}]`)?.value || "";
+        q.answer_2 = document.querySelector(`[name=answer_2_${index}]`)?.value || "";
+        q.answer_3 = document.querySelector(`[name=answer_3_${index}]`)?.value || "";
+        q.answer_4 = document.querySelector(`[name=answer_4_${index}]`)?.value || "";
+        q.right_answer = document.querySelector(`[name=right_answer_${index}]`)?.value || "answer_1";
+      });
+      saveToLocal();
+    }
+
+    async function uploadImage(event, index) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const response = await fetch("/upload", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        const result = await response.json();
+        quiz.questions[index].title = result.url; // حفظ رابط الصورة في title
+        saveToLocal();
+        renderQuestions();
+      } catch (err) {
+        alert("حدث خطأ أثناء رفع الصورة");
+        console.error(err);
+      }
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById("questionsContainer");
+      container.innerHTML = "";
+
+      quiz.questions.forEach((q, index) => {
+        container.innerHTML += `
+          <fieldset>
+            <legend>السؤال ${index + 1}</legend>
+
+            <label>صورة السؤال:</label>
+            <input type="file" name="question_image_${index}" accept="image/*" onchange="uploadImage(event, ${index})"><br>
+            ${q.title ? `<img src="${q.title}" width="200">` : ""}<br>
+
+            <label>الإجابة 1:</label>
+            <input type="text" name="answer_1_${index}" value="${q.answer_1}" required><br>
+
+            <label>الإجابة 2:</label>
+            <input type="text" name="answer_2_${index}" value="${q.answer_2}" required><br>
+
+            <label>الإجابة 3:</label>
+            <input type="text" name="answer_3_${index}" value="${q.answer_3}" required><br>
+
+            <label>الإجابة 4:</label>
+            <input type="text" name="answer_4_${index}" value="${q.answer_4}" required><br>
+
+            <label>الإجابة الصحيحة:</label>
+            <select name="right_answer_${index}">
+              <option value="answer_1" ${q.right_answer === "answer_1" ? "selected" : ""}>الإجابة 1</option>
+              <option value="answer_2" ${q.right_answer === "answer_2" ? "selected" : ""}>الإجابة 2</option>
+              <option value="answer_3" ${q.right_answer === "answer_3" ? "selected" : ""}>الإجابة 3</option>
+              <option value="answer_4" ${q.right_answer === "answer_4" ? "selected" : ""}>الإجابة 4</option>
+            </select><br>
+
+            <button type="button" onclick="deleteQuestion(${index})">🗑 حذف السؤال</button>
+          </fieldset>
+        `;
+      });
+    }
+
+    function addQuestion() {
+      updateQuizFromInputs();
+      quiz.questions.push({
+        title: "", // رابط الصورة
+        answer_1: "",
+        answer_2: "",
+        answer_3: "",
+        answer_4: "",
+        right_answer: "answer_1",
+      });
+      saveToLocal();
+      renderQuestions();
+    }
+
+    function deleteQuestion(index) {
+      updateQuizFromInputs();
+      quiz.questions.splice(index, 1);
+      saveToLocal();
+      renderQuestions();
+    }
+
+    document.getElementById("createQuizForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      updateQuizFromInputs();
+
+      const missingTitle = quiz.questions.some(q => !q.title);
+      if (missingTitle) {
+        alert("يجب رفع صورة لكل سؤال قبل الحفظ");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("title", document.getElementById("title").value);
+      formData.append("type", document.getElementById("type").value);
+      formData.append("exam_duration", parseInt(document.getElementById("exam_duration").value) || 0);
+      formData.append("questions", JSON.stringify(quiz.questions));
+
+      try {
+        const response = await fetch(`/${courseIdSelect.value}/quiz`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          alert("✅ تم إنشاء الاختبار بنجاح");
+          localStorage.removeItem("tempQuiz");
+          window.location.href = `/course.html?id=${courseId}`;
+        } else {
+          alert(result.msg || "❌ حدث خطأ أثناء الحفظ");
+        }
+      } catch (err) {
+        console.error("❌ خطأ في الاتصال:", err);
+        alert("فشل الاتصال بالسيرفر");
+      }
+    });
+
+    renderQuestions();
+  </script>
+</body>
+</html>

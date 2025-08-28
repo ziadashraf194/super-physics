@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>تفاصيل الكورس</title>
+  <link rel="stylesheet" href="Course.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+  <div id="header"></div>
+  
+  <div class="div">
+    <div class="div-text">
+      <h2 style="font-weight: bold;" id="title"></h2>
+      <p id="description"></p>
+      <div class="contant"></div>
+    </div>
+
+    <div class="image">
+      <img id="image" src="" alt="">
+      <button type="button" id="subscribe-btn" class="btn btn-primary btn-lg btn-block">اشتراك</button>
+    </div>
+    <div class="content"></div>
+  </div>
+
+  <!-- popup -->
+  <div class="popup-overlay" id="popup" style="display:none;">
+    <div class="popup-box">
+      <i onclick="closePopup()" class="fa-regular fa-circle-xmark fa-2xl close-btn"></i>
+      <h3>ادخل كود السنتر</h3>
+      <input type="text" id="coupon-input" placeholder="ادخل الكود ">
+      <button id="popup-subscribe-btn">اشتراك</button>
+      <p id="popup-message" style="color:red; font-size:14px;"></p>
+    </div>
+  </div>
+
+  <div id="footer"></div>
+  <script src="/header/header.js"></script>
+
+  <script>
+    // --- Helpers ---
+    function openPopup() {
+      document.getElementById("popup").style.display = "flex";
+    }
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    const contant = document.querySelector(".contant");
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('id');
+    const subscribeBtn = document.getElementById("subscribe-btn");
+    popupBox =document.querySelector(".popup-box")
+    
+
+    // --- التحقق من التوكن ---
+    const token = localStorage.getItem("token");
+    if (!token) {
+     
+    //  window.location.href = "/login/index.html"; // غيرها حسب صفحة تسجيل الدخول عندك
+   openPopup()
+
+   popupBox.innerHTML = `
+  <i onclick="closePopup()" class="fa-regular fa-circle-xmark fa-2xl close-btn"></i>
+  <h3>سجل الدخول للاشتراك</h3>
+  
+  <button id="popup-subscribe-btn"  >تسجيل الدخول</button>
+  <p id="popup-message" style="color:red; font-size:14px;"></p>
+`;
+
+// خلي زر تسجيل الدخول يوجه للصفحة
+document.getElementById("popup-subscribe-btn").onclick = () => {
+  window.location.href = "/login/index.html";
+};
+
+    
+    }
+
+    // --- جلب بيانات الكورس ---
+    fetch(`/courses/${courseId}`)
+      .then(res => {
+        if (!res.ok) throw new Error('الكورس غير موجود');
+        return res.json();
+      })
+      .then(course => {
+        document.getElementById('title').textContent = course.title;
+        document.getElementById('description').textContent = course.description;
+        document.getElementById("image").src = `/${course.image}`;
+      })
+      .catch(err => {
+        document.getElementById('title').textContent = 'حدث خطأ';
+        document.getElementById('description').textContent = err.message;
+      });
+
+
+let userSub = false
+  function Sup() {
+    return fetch(`/subscribe/${courseId}/${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        if(data.msg) {
+          subscribeBtn.innerText = "مشترك";
+          subscribeBtn.style.backgroundColor = "green";
+          return true;  // بيرجع Promise فيه true
+        } else {
+          subscribeBtn.innerText = "اشترك";
+          subscribeBtn.onclick = openPopup;
+          document.querySelectorAll(".contant div").forEach(div => {
+            div.onclick = openPopup;
+            return false
+          });
+
+          console.log(document.querySelectorAll(".contant"));
+          return false; // بيرجع Promise فيه false
+        }
+      })
+      .catch(err => {
+        console.error("خطأ:",err);
+        return false;
+      });
+  }
+
+
+
+
+
+    // --- جلب محتوى الكورس ---
+    fetch(`/${courseId}/contant`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (response.status === 401) {
+    //    window.location.href = "/home/home.html"
+    contant.innerHTML=` <button id="popup-subscribe-btn" class="btn btn-primary btn-lg btn-block"onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي </button>
+    `
+      }
+      if (!response.ok) throw new Error("حدث خطأ أثناء جلب البيانات");
+      return response.json();
+    })
+    .then(data => {
+      const contentArray = data.contant;
+      console.log(contentArray)
+        if(contentArray.length==0) {
+          contant.innerHTML =`<h1 style="color:#000"> استني المحتوي هينزل قريب</h1>`
+      } 
+      for (let item of contentArray) {
+      
+    if(item.type=="video"){
+      icon="fa-circle-play"
+    }else if (item.type=="pdf"){
+       icon="fa-file-lines"
+    }else if (item.type=="image") {
+       icon="fa-image"
+    }else{
+       icon="fa-question"
+    }
+        Sup().then(result => {
+if (result===true) {
+         contant.innerHTML += `
+   <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
+    <p id="${item.type}">
+      <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}</p>
+  </div>
+`;   
+  
+} else {
+     contant.innerHTML += `
+   <div class="contant-div" onclick="openPopup()">
+    <p id="${item.type}">
+      <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}</p>
+  </div>
+`;
+}     
+ });
+      }
+    })
+    .catch(err => {
+      console.error("خطأ:", err.message);
+    });
+
+  
+
+    // --- الاشتراك باستخدام الكوبون ---
+    document.getElementById("popup-subscribe-btn").addEventListener("click", () => {
+      const couponCode = document.getElementById("coupon-input").value.trim();
+      const message = document.getElementById("popup-message");
+      message.textContent = "";
+
+      if (!couponCode) {
+        message.textContent = "من فضلك ادخل الكود";
+        return;
+      }
+
+      fetch(`/subscribe/${courseId}/${couponCode}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message && data.message.includes("success")) {
+          message.style.color = "green";
+          message.textContent = "تم الاشتراك بنجاح";
+          subscribeBtn.innerText = "مشترك";
+          subscribeBtn.style.backgroundColor = "green";
+          setTimeout(() => closePopup(), 500);
+          location.reload();
+        } else {
+          message.style.color = "red";
+          message.textContent = data.message || "فشل الاشتراك";
+        }
+      })
+      .catch(err => {
+        message.style.color = "red";
+        message.textContent = "خطأ في السيرفر";
+      });
+    });
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+  
+</body>
+</html>

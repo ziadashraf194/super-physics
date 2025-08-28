@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>قائمة الطلاب</title>
+<style>
+  .students-container {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:#f9fafb;
+    padding:30px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .students-container h2 { 
+    text-align:center; 
+    margin-bottom:20px; 
+    color:#333; 
+  }
+
+  .students-container .search-box { 
+    text-align:center; 
+    margin-bottom:20px; 
+  }
+  .students-container .search-box input { 
+    padding:8px; border-radius:6px; border:1px solid #ccc; width:250px; margin:0 5px; 
+  }
+  .students-container .search-box button { 
+    padding:8px 15px; border:none; border-radius:6px; cursor:pointer; transition:0.3s; color:#fff; 
+  }
+  .students-container .search-box button:hover { opacity:0.9; }
+  .students-container .search-box button#searchBtn { background:#28a745; }
+  .students-container .search-box button.clear { background:#dc3545; }
+  .students-container .search-box button.qr { background:#17a2b8; }
+
+  .students-container table { 
+    width:100%; border-collapse:collapse; background:#fff; border-radius:12px; 
+    overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); 
+    direction: rtl;
+  }
+  .students-container th, 
+  .students-container td { padding:12px 15px; text-align:center; }
+  .students-container th { background:#007bff; color:#fff; font-weight:600; font-size:15px; }
+  .students-container tr:nth-child(even) { background:#f2f6fc; }
+  .students-container tr:hover { background:#eaf1fb; transition:0.3s; cursor:pointer; }
+
+  .students-container .pagination { margin-top:20px; text-align:center;display: flex;justify-content: center; }
+  .students-container button.page-btn { 
+    padding:10px 20px; margin:0 5px; border:none; border-radius:8px; cursor:pointer; 
+    background:#007bff; color:#fff; font-size:14px; transition:0.3s; 
+    align-self: center;
+  }
+  .students-container button.page-btn:hover:not(:disabled) { background:#0056b3; }
+  .students-container button.page-btn:disabled { background:#aaa; cursor:not-allowed; }
+
+  .students-container .loader { 
+    border: 6px solid #f3f3f3; border-top: 6px solid #007bff; border-radius: 50%; 
+    width: 50px; height: 50px; animation: spin 1s linear infinite; 
+    margin: 30px auto; display: none; 
+  }
+  @keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+  }
+
+  .students-container #qr-reader { width:300px; margin:20px auto; display:none; }
+</style>
+</head>
+<body>
+<div id="header"></div>
+
+<div class="students-container">
+  <h2>قائمة الطلاب </h2>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="ابحث بالاسم أو centerId">
+    <button id="searchBtn">بحث</button>
+    <button class="clear" id="clearBtn">مسح البحث</button>
+    <button class="qr" id="startQrBtn">مسح QR</button>
+  </div>
+
+  <div id="loader" class="loader"></div>
+
+  <!-- QR Reader -->
+  <div id="qr-reader"></div>
+
+  <table id="usersTable">
+    <thead>
+      <tr>
+        <th>centerId</th>
+        <th>الاسم</th>
+        <th>النقاط</th>
+      </tr>
+    </thead>
+    <tbody id="usersBody"></tbody>
+  </table>
+
+  <div class="pagination">
+    <button class="page-btn" id="prev">⬅ السابق</button>
+    <span id="pageNum"></span>
+    <button class="page-btn" id="next">التالي ➡</button>
+  </div>
+</div>
+
+<!-- مكتبة QR -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+(function(){
+  let currentPage = 1;
+  let searchValue = "";
+  let qrScanner;
+
+  // دالة تحميل المستخدمين
+  async function loadUsers(pageNum = 1) {
+    const loader = document.getElementById("loader");
+    const usersBody = document.getElementById("usersBody");
+
+    try {
+      loader.style.display = "block";
+      usersBody.innerHTML = "";
+      currentPage = pageNum;
+
+      let name = "", centerId = "";
+      if (searchValue) {
+        if (/^\d+$/.test(searchValue)) centerId = searchValue;
+        else name = searchValue;
+      }
+
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set("page", currentPage);
+      if(name) newUrl.searchParams.set("name", name); else newUrl.searchParams.delete("name");
+      if(centerId) newUrl.searchParams.set("centerId", centerId); else newUrl.searchParams.delete("centerId");
+      window.history.pushState({}, "", newUrl);
+
+      let url = `/users?page=${currentPage}`;
+      if(name) url += `&name=${encodeURIComponent(name)}`;
+      if(centerId) url += `&centerId=${encodeURIComponent(centerId)}`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      loader.style.display = "none";
+
+      if(data.users.length===0) {
+        usersBody.innerHTML = "<tr><td colspan='3'>لا يوجد بيانات</td></tr>";
+      } else {
+        data.users.forEach(u => {
+          let tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${u.centerId || "غير محدد"}</td>
+            <td>${u.name}</td>
+            <td>${u.points}</td>
+          `;
+          tr.addEventListener("click", ()=> {
+            window.location.href = "/admin/userData.html?id=" + u._id;
+          });
+          usersBody.appendChild(tr);
+        });
+      }
+
+      document.getElementById("pageNum").innerText = `صفحة ${data.page} من ${data.pages}`;
+      document.getElementById("prev").disabled = (data.page===1);
+      document.getElementById("next").disabled = (data.page===data.pages);
+
+    } catch(err) {
+      loader.style.display = "none";
+      usersBody.innerHTML = "<tr><td colspan='3' style='color:red'>خطأ في جلب البيانات ❌</td></tr>";
+      console.error(err);
+    }
+  }
+
+  // أزرار pagination
+  document.getElementById("prev").addEventListener("click", ()=>loadUsers(currentPage-1));
+  document.getElementById("next").addEventListener("click", ()=>loadUsers(currentPage+1));
+
+  // البحث
+  document.getElementById("searchBtn").addEventListener("click", ()=>{
+    searchValue = document.getElementById("searchInput").value.trim();
+    loadUsers(1);
+  });
+
+  // مسح البحث
+  document.getElementById("clearBtn").addEventListener("click", ()=>{
+    document.getElementById("searchInput").value = "";
+    searchValue = "";
+    loadUsers(1);
+  });
+
+  // تحميل أول صفحة
+  const params = new URLSearchParams(window.location.search);
+  if(params.get("name")) searchValue = params.get("name");
+  else if(params.get("centerId")) searchValue = params.get("centerId");
+  loadUsers(Number(params.get("page"))||1);
+
+  // QR Scanner
+  document.getElementById("startQrBtn").addEventListener("click", ()=>{
+    const qrReaderDiv = document.getElementById("qr-reader");
+    qrReaderDiv.style.display = "block";
+
+    if(!qrScanner){
+      qrScanner = new Html5Qrcode("qr-reader");
+    }
+
+    qrScanner.start(
+      { facingMode: "environment" }, 
+      { fps: 10, qrbox: 250 },
+      (decodedText) => {
+        console.log("QR تم قراءته:", decodedText);
+        qrScanner.stop().then(() => {
+          qrReaderDiv.style.display = "none";
+          window.location.href = decodedText;
+        }).catch(err => console.error("خطأ عند إيقاف الكاميرا:", err));
+      },
+      (errorMessage) => {
+        console.warn(errorMessage);
+      }
+    );
+  });
+
+})(); 
+</script>
+
+<div id="footer"></div>
+<script src="/header/header.js"></script>
+</body>
+</html>

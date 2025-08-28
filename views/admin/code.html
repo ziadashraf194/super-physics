@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <title>الاكواد</title>
+</head>
+<body>
+    <div id="header"></div>
+
+    <style>
+        table {
+      border-collapse: collapse;
+      width: 85%;
+      margin: 20px auto;
+      text-align: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      direction: rtl;
+    }
+
+    thead th {
+      background: #0091ff;
+      color: #fff;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 15px;
+    }
+
+    tr:hover {
+      background: #f1f9ff;
+    }
+    #editPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #f9f9f9;
+    padding: 25px 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    border-radius: 10px;
+    width: 70%;
+    font-family: 'Arial', sans-serif;
+    direction: rtl;
+}
+
+/* عنوان البوباب */
+#editPopup h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #333;
+}
+
+/* الحقول */
+#editPopup div {
+    margin-bottom: 15px;
+}
+
+#editPopup input[type="text"],
+#editPopup input[type="number"],
+#editPopup input[type="datetime-local"],
+#createExpiresAtInput,
+#createUsageLimitInput,
+ #createCountInput{
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+#editPopup input[disabled] {
+    background: #eee;
+}
+
+/* الأزرار */
+#editPopup .popup-buttons {
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#editPopup button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}
+
+/* #editPopup button.save { background-color: rgb(0, 89, 255); } */
+#editPopup button.delete { background-color: #dc3545; }
+#editPopup button.cancel { background-color: #6c757d; }
+      </style>
+    </head>
+    <body>
+      <h2 style="text-align:center;color: rgb(0, 89, 255);">الاكواد </h2>
+      
+      <div style="text-align: center; margin: 20px;">
+        <button onclick="openCreatePopup()" style="padding: 10px 20px; background-color: #0088ff; color: white; border: none; border-radius: 6px; font-weight: bold;width: 60%;">
+           إنشاء أكواد 
+        </button>
+      </div>
+      <button id="exportBtn" class="btn btn-outline-success" style="margin-left: 8%;"> <i class="fa-solid fa-download" style="color: #00d65d;"></i>تحميل </i> </button>
+
+      <div id="createPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+background:#fff; padding:25px 30px; box-shadow:0 0 20px rgba(0,0,0,0.2); z-index:1000; border-radius:12px; width:400px; font-family:'Segoe UI', sans-serif;">
+  <h3 style="text-align:center; color:#0073ff;">إنشاء أكواد جديدة</h3>
+
+  
+
+  <!-- <label>معرف الكورس:</label>
+  <input type="text" id="createCourseIdInput"> -->
+
+  <label>عدد الأكواد:</label>
+  <input type="number" id="createCountInput">
+
+  <label>مرات الاستخدام لكل كود:</label>
+  <input type="number" id="createUsageLimitInput" value="1">
+
+  <label>تاريخ الانتهاء:</label>
+  <input type="datetime-local" id="createExpiresAtInput">
+
+  <button onclick="createCoupons()" class="btn btn-primary">إنشاء</button>
+  <button onclick="closeCreatePopup()" class="btn btn-danger">إلغاء</button>
+</div>
+
+
+      <div id="editPopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+      background:#fff; padding:20px; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000;">
+      <h3>تعديل الكوبون</h3>
+      <label>الكود:</label>
+      <input type="text" id="couponCodeInput"><br><br>
+  
+      <!-- <label>معرف الكورس:</label> -->
+      <input type="text" id="courseIdInput" style="display: none;" >
+  
+      <label>تاريخ الانتهاء:</label>
+      <input type="datetime-local" id="expiresAtInput"><br><br>
+  
+      <label>حد الاستخدام:</label>
+      <input type="number" id="usageLimitInput"><br><br>
+  
+      <label>عدد المستخدمين:</label>
+      <input type="number" id="usedCountInput" disabled><br><br>
+  
+      <label>فعال:</label>
+      <input type="checkbox" id="isActiveInput"><br><br>
+  
+      <button onclick="saveCoupon()" class="btn btn-primary">حفظ التعديلات</button>
+      <button onclick="deleteCoupon()" class="btn btn-danger" style="background-color: red; color: white;"><i class="fa-solid fa-trash" style="color: #ffffff;"></i>️ حذف الكوبون</button>
+      <button onclick="closeEditPopup()" class="btn btn-secondary">إلغاء</button>
+      
+  </div>
+  
+
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الكود</th>
+            <th>تاريخ الانتهاء</th>
+            <th>المرات المتبقية</th>
+            <th> مرات الاستخدام</th>
+            <th> كود يعمل</th>
+            <th> تعديل الكود </th>
+          </tr>
+        </thead>
+        <tbody id="couponTable"></tbody>
+      </table>
+  
+    <div id="footer"></div>
+    <script src="/header/header.js"></script>
+    <script>
+        async function init() {
+          const token = localStorage.getItem('token'); 
+      
+          function parseJwt(token) {
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+              );
+              return JSON.parse(jsonPayload);
+            } catch (e) {
+              console.error('خطأ في فك التوكن:', e);
+              return null;
+            }
+          }
+      
+          const userId = token ? parseJwt(token)?.id : null;
+  
+      
+          async function checkAdmin() {
+            if (!userId) return false;
+      
+            try {
+              const response = await fetch(`/api/verify/admin/${userId}`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                }
+              });
+      
+              let data;
+              try {
+                data = await response.json();
+              } catch(e) {
+                console.error("الرد ليس JSON:", await response.text());
+                return false;
+              }
+      
+              if (response.ok) {
+                return data.isAdmin === true;
+              } else {
+                return false;
+              }
+            } catch (err) {
+              console.error("فشل الاتصال بالسيرفر", err);
+              return false;
+            }
+          }
+      
+          const isAdmin = await checkAdmin();
+          if (!isAdmin) {
+            window.location.href = "/404.html";
+          }
+        }
+      
+        // تشغيل الدالة
+        init();
+      </script>
+      <script>
+         const params = new URLSearchParams(window.location.search);
+  const courseId = params.get("id");
+
+  async function fetchCoupons() {
+    try {
+      const response = await fetch(`/coupon?courseId=${courseId}`);
+
+      if (!response.ok) {
+        throw new Error("فشل في جلب البيانات");
+      }
+
+      const coupons = await response.json();
+   
+
+    
+      tableBody.innerHTML = "";
+
+      for (let i = 0; i < coupons.length; i++) {
+        const coupon = coupons[i];
+
+        // تحقق من حالة الكود
+        let codeActive;
+        if (coupon.isActive) {
+          codeActive = "يعمل";
+        } else {
+          codeActive = "مستهلك";
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${coupon.code}</td>
+          <td>${new Date(coupon.expiresAt).toLocaleDateString()}</td>
+          <td>${coupon.usageLimit}</td>
+          <td>${coupon.usedCount}</td>
+          <td>${codeActive}</td>
+          <td><button type="button" onclick="openEditPopup(${coupon._id})" class="btn btn-info"coupon="${coupon._id}">تعديل</button></td>
+        `;
+        tableBody.appendChild(tr);
+      }
+    } catch (err) {
+      console.error("خطأ أثناء جلب الكوبونات:", err.message);
+    }
+  }
+
+  fetchCoupons();
+      </script>
+
+
+
+
+<!-- الجزء الخاص بالجدول والبوباب يبقى كما هو -->
+
+<script>
+    
+    
+    // تعديل زر التعديل في الجدول ليتم تمرير الـ ID كـ string
+    async function fetchCoupons() {
+        try {
+            const response = await fetch(`/coupon?courseId=${courseId}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            });
+            if (!response.ok) throw new Error("فشل في جلب البيانات");
+            const coupons = await response.json();
+    
+            const tableBody = document.getElementById("couponTable");
+            tableBody.innerHTML = "";
+    
+            coupons.forEach((coupon, i) => {
+                let codeActive = coupon.isActive ? "يعمل" : "مستهلك";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${i + 1}</td>
+                    <td>${coupon.code}</td>
+                    <td>${new Date(coupon.expiresAt).toLocaleDateString()}</td>
+                    <td>${coupon.usageLimit}</td>
+                    <td>${coupon.usedCount}</td>
+                    <td>${codeActive}</td>
+                  <td>
+
+<button type="button" onclick="openEditPopup('${coupon._id}', '${coupon.code}', '${coupon.courseId}', '${coupon.expiresAt}', ${coupon.usageLimit}, ${coupon.usedCount}, ${coupon.isActive})" class="btn btn-info">تعديل</button>
+
+</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+    
+        } catch (err) {
+            console.error(err);
+        }
+    }
+    
+    fetchCoupons();
+
+    function openEditPopup(id, code, courseId, expiresAt, usageLimit, usedCount, isActive) {
+  document.getElementById("couponCodeInput").value = code;
+  document.getElementById("courseIdInput").value = courseId;
+  document.getElementById("expiresAtInput").value = new Date(expiresAt).toISOString().slice(0, 16);
+  document.getElementById("usageLimitInput").value = usageLimit;
+  document.getElementById("usedCountInput").value = usedCount;
+  document.getElementById("isActiveInput").checked = isActive;
+
+  // حفظ الـ ID في عنصر مخفي أو متغير عام
+  window.editingCouponId = id;
+
+  document.getElementById("editPopup").style.display = "block";
+}
+function closeEditPopup() {
+  document.getElementById("editPopup").style.display = "none";
+}
+async function saveCoupon() {
+  const id = window.editingCouponId;
+  const token = localStorage.getItem('token');
+
+  const updatedCoupon = {
+    code: document.getElementById("couponCodeInput").value,
+    courseId: document.getElementById("courseIdInput").value,
+    expiresAt: document.getElementById("expiresAtInput").value,
+    usageLimit: parseInt(document.getElementById("usageLimitInput").value),
+    isActive: document.getElementById("isActiveInput").checked
+  };
+
+  try {
+    const response = await fetch(`/coupon/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify(updatedCoupon)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("✅ تم تعديل الكوبون بنجاح");
+      closeEditPopup();
+      fetchCoupons(); // إعادة تحميل الجدول
+    } else {
+      alert("❌ فشل التعديل: " + result.msg);
+    }
+  } catch (err) {
+    console.error("خطأ أثناء حفظ التعديلات:", err);
+    alert("❌ حصل خطأ أثناء الاتصال بالسيرفر");
+  }
+}
+async function deleteCoupon() {
+  const id = window.editingCouponId;
+  const token = localStorage.getItem('token');
+
+  const confirmDelete = confirm("هل أنت متأكد أنك تريد حذف هذا الكوبون؟");
+
+  if (!confirmDelete) return;
+
+  try {
+    const response = await fetch(`/coupon/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert("✅ تم حذف الكوبون بنجاح");
+      closeEditPopup();
+      fetchCoupons(); // إعادة تحميل الجدول بعد الحذف
+    } else {
+      alert("❌ فشل الحذف: " + result.msg);
+    }
+  } catch (err) {
+    console.error("خطأ أثناء الحذف:", err);
+    alert("❌ حصل خطأ أثناء الاتصال بالسيرفر");
+  }
+}
+
+function openCreatePopup() {
+    document.getElementById("createPopup").style.display = "block";
+  }
+
+  function closeCreatePopup() {
+    document.getElementById("createPopup").style.display = "none";
+  }
+
+async function createCoupons() {
+  // const courseId = document.getElementById("createCourseIdInput").value;
+  const count = document.getElementById("createCountInput").value;
+  const usageLimit = document.getElementById("createUsageLimitInput").value;
+  const expiresAt = document.getElementById("createExpiresAtInput").value;
+  const token = localStorage.getItem('token');
+
+  if (!courseId || !count || count <= 0 || !expiresAt || usageLimit <= 0) {
+    alert("❗ يرجى إدخال جميع البيانات بشكل صحيح");
+    return;
+  }
+
+  try {
+    const response = await fetch(`/coupon/${courseId}/${count}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ usageLimit, expiresAt })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(`✅ تم إنشاء ${count} كوبون بنجاح`);
+      closeCreatePopup();
+      fetchCoupons();
+    } else {
+      alert("❌ فشل الإنشاء: " + result.msg);
+    }
+  } catch (err) {
+    console.error("خطأ أثناء الإنشاء:", err);
+    alert("❌ حصل خطأ أثناء الاتصال بالسيرفر");
+  }
+}
+
+    </script>
+  
+  <script>
+    document.getElementById("exportBtn").addEventListener("click", function () {
+      const table = document.querySelector("table");
+      let workbook = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+      XLSX.writeFile(workbook, "table.xlsx");
+    });
+  </script>
+
+</body>
+</html>

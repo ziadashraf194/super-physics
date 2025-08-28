@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <div class="contant">
+  <form id="signupForm">
+    <h2>أنشي حسابك</h2>
+    <input type="text" name="name1" placeholder="الاسم الاول" required minlength="3"/>
+    <input type="text" name="name2" placeholder="الاسم الثاني" required minlength="3"/><br />
+    <input type="text" name="name3" placeholder="الاسم الثالث" required minlength="3"/>
+    <input type="text" name="name4" placeholder="الاسم الاخير" required minlength="3"/><br/>
+    <input type="tel" name="tel" placeholder="رقم الهاتف " required /><br/>
+    <select name="grad" id="">
+      <option value="الصف الاول">الصف الاول</option>
+      <option value="الصف الثاني">الصف الثاني</option>
+      <option value="الصف الثالث">الصف الثالث</option>
+    </select><br/>
+    <input type="password" name="password" placeholder="كلمة المرور" required />
+    <input type="password" name="password2" placeholder="تأكيد كلمة المرور" required /><br/>
+    <h4></h4>
+    <a href="/login/index.html" style="color: rgb(70, 121, 222);">هل لديك حساب؟</a>
+    <button type="submit">إنشاء حساب</button>
+  </form>
+  <img src="/imge/signupForm.svg" alt="">
+</div>
+
+  <script>
+    const form = document.getElementById("signupForm");
+    let errorViewer = document.querySelector('h4');
+    
+    async function checkToken() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+          errorViewer.innerText = "انت مسجل بالفعل";
+          errorViewer.style.display = "block";
+          window.location.href = "/home/home.html";
+        } else {
+          localStorage.removeItem("token");
+        }
+      } catch (err) {
+        console.error("خطأ في التحقق من التوكن", err);
+        localStorage.removeItem("token");
+      }
+    }
+
+    checkToken();
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = {
+        name: formData.get("name1") + " " + formData.get("name2") + " " + formData.get("name3") + " " + formData.get("name4"),
+        tel: formData.get("tel"),
+        grad: formData.get("grad"),
+        password: formData.get("password"),
+        password2: formData.get("password2"),
+      };
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          if (error.message && error.message.trim() !== "") {
+            errorViewer.innerText = error.message;
+            errorViewer.style.display = "block";
+          } else {
+            errorViewer.innerText = "";
+            errorViewer.style.display = "none";
+          }
+          return;
+        }
+
+        const result = await response.json();
+        const token = result.token;
+      
+        localStorage.setItem("token", token);
+        window.location.href = "/home/home.html";
+
+      } catch (err) {
+        errorViewer.innerText = "حدث خطأ";
+        errorViewer.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>

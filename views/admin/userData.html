@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بيانات الطالب</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f9; color: #333; direction: rtl; }
+    .container { max-width: 1200px; margin: 30px auto; padding: 20px; }
+    .card { background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 20px; margin-bottom: 25px; }
+    .user-header { display: flex; align-items: center; gap: 20px; }
+    .user-header img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #007bff; }
+    .user-header h2 { margin: 0; font-size: 22px; color: #007bff; }
+    .user-info p { margin: 4px 0; font-size: 15px; color: #555; }
+    .section-title { font-size: 20px; margin-bottom: 15px; color: #444; border-right: 5px solid #007bff; padding-right: 10px; }
+    .results-table, .attendance-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .results-table th, .results-table td, .attendance-table th, .attendance-table td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; font-size: 14px; }
+    .results-table th, .attendance-table th { background: #007bff; color: #fff; font-weight: bold; }
+    
+    /* حالات الدفع */
+    .paid { 
+      color: #fff; 
+      background: #28a745; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      font-size: 12px;
+    }
+    .unpaid { 
+      color: #fff; 
+      background: #dc3545; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      font-size: 12px;
+    }
+    
+    /* حالات الحضور */
+    .present { 
+      color: #fff; 
+      background: #20c997; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      font-size: 12px;
+    }
+    .absent { 
+      color: #fff; 
+      background: #fd7e14; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      font-size: 12px;
+    }
+    .empty-attendance { 
+      color: #6c757d; 
+      background: #e9ecef; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      font-size: 12px;
+    }
+    
+    /* العناصر القابلة للتعديل */
+    .editable { 
+      cursor: pointer; 
+      padding: 4px 8px; 
+      border-radius: 6px; 
+      transition: all 0.2s ease;
+      min-width: 40px;
+      display: inline-block;
+    }
+    .editable:hover { 
+      background: #f8f9fa; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
+    }
+    
+    /* مربع النص للتحرير */
+    .editing-input { 
+      background: #fff; 
+      border: 2px solid #007bff; 
+      border-radius: 6px; 
+      padding: 4px 8px; 
+      text-align: center; 
+      font-size: inherit; 
+      width: 80px;
+      outline: none;
+    }
+    
+    /* قائمة الخيارات */
+    .options-menu {
+      position: absolute;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      min-width: 120px;
+      padding: 5px 0;
+    }
+    .options-menu div {
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .options-menu div:hover {
+      background: #f8f9fa;
+    }
+    
+    #saveBtn { 
+      display:none; 
+      background: linear-gradient(45deg, #007bff, #0056b3); 
+      color:#fff; 
+      border:none; 
+      padding:12px 24px; 
+      border-radius:8px; 
+      cursor:pointer; 
+      margin-top:15px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    #saveBtn:hover { 
+      background: linear-gradient(45deg, #0056b3, #003d82); 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    }
+    
+    /* تحسينات إضافية */
+    .attendance-cell {
+      position: relative;
+    }
+    
+    .month-row:nth-child(even) {
+      background: #f8f9fa;
+    }
+    
+    /* تنسيق الكورسات */
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+      margin-top: 10px;
+    }
+    
+    .course-card {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .course-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    }
+    
+    .course-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .course-details {
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+    }
+    
+    .course-detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .course-detail-item:last-child {
+      border-bottom: none;
+    }
+    
+    .course-detail-label {
+      opacity: 0.9;
+    }
+    
+    .course-detail-value {
+      font-weight: bold;
+      background: rgba(255,255,255,0.15);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    
+    /* حالة عدم وجود كورسات */
+    .no-courses {
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 40px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 2px dashed #dee2e6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- بيانات الطالب -->
+    <div class="card">
+      <div class="user-header">
+        <img id="userImage" src="" alt="صورة الطالب">
+        <div>
+          <h2 id="userName" class="editable" data-field="name"></h2>
+          <div class="user-info">
+            <p><strong>كود السنتر:</strong> <span id="userCenterId" class="editable" data-field="centerId"></span></p>
+            <p><strong>الصف:</strong> <span id="userGrad" class="editable" data-field="grad"></span></p>
+            <p><strong>الهاتف:</strong> <span id="userTel" class="editable" data-field="tel"></span></p>
+            <p><strong>الدرجات:</strong> <span id="userPoints" class="editable" data-field="points"></span></p>
+          </div>
+        </div>
+      </div>
+      <button id="saveBtn">💾 حفظ التعديلات</button>
+    </div>
+
+    <!-- الكورسات المشترك بها -->
+    <div class="card">
+      <h3 class="section-title"><i class="fa-solid fa-book"></i> الكورسات المشترك بها</h3>
+      <div class="courses-grid" id="coursesGrid"></div>
+    </div>
+
+    <!-- النتائج -->
+    <div class="card">
+      <h3 class="section-title"><i class="fa-solid fa-chart-line"></i> النتائج</h3>
+      <table class="results-table" id="resultsTable">
+        <thead><tr><th>الكورس</th><th>الاختبار</th><th>النتيجة</th><th>التاريخ</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- الحضور -->
+    <div class="card">
+      <h3 class="section-title"><i class="fa-solid fa-calendar-check"></i> الحضور</h3>
+      <div class="table-responsive">
+        <table class="attendance-table" id="attendanceTable">
+          <thead>
+            <tr><th>الشهر</th><th>ح1</th><th>ح2</th><th>ح3</th><th>ح4</th><th>ح5</th><th>ح6</th><th>ح7</th><th>ح8</th><th>المدفوع</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const userID = params.get('id');
+  const token = localStorage.getItem("token");
+  const saveBtn = document.getElementById("saveBtn");
+  
+  // خيارات الحضور
+  const attendanceOptions = [
+    { value: "", text: "-", class: "empty-attendance" },
+    { value: "حاضر", text: "حاضر", class: "present" },
+    { value: "غائب", text: "غائب", class: "absent" }
+  ];
+  
+  // خيارات الدفع
+  const paymentOptions = [
+    { value: "مدفوع", text: "مدفوع", class: "paid" },
+    { value: "غير مدفوع", text: "غير مدفوع", class: "unpaid" }
+  ];
+
+  // دالة لتطبيق الألوان حسب القيمة
+  function applyStatusClass(element, value, isPayment = false) {
+    // إزالة جميع الكلاسات السابقة
+    element.classList.remove('paid', 'unpaid', 'present', 'absent', 'empty-attendance');
+    
+    if (isPayment) {
+      if (value === "مدفوع") element.classList.add('paid');
+      else if (value === "غير مدفوع") element.classList.add('unpaid');
+    } else {
+      if (value === "حاضر") element.classList.add('present');
+      else if (value === "غائب") element.classList.add('absent');
+      else element.classList.add('empty-attendance');
+    }
+  }
+
+  async function loadUserData() {
+    try {
+      const res = await fetch(`/admin/user/${userID}`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (!res.ok) throw new Error("فشل في جلب البيانات");
+      const data = await res.json();
+  console.log(data)
+      // --- بيانات الطالب ---
+      document.getElementById("userName").innerText = data.user.name;
+      document.getElementById("userTel").innerText = data.user.tel;
+      document.getElementById("userGrad").innerText = data.user.grad;
+      document.getElementById("userPoints").innerText = data.user.points;
+      document.getElementById("userCenterId").innerText = data.user.centerId;
+      document.getElementById("userImage").src = "http://localhost:4000" + (data.user.Image || "/uploads/defaultUser.png");
+
+      // --- الكورسات المشترك بها ---
+      const coursesGrid = document.getElementById("coursesGrid");
+      coursesGrid.innerHTML = "";
+      
+      if (data.courses && data.courses.length > 0) {
+          data.courses.forEach(course => {
+            const courseCard = document.createElement("div");
+            courseCard.className = "course-card";
+            courseCard.innerHTML = `
+              <div class="course-title">
+                <i class="fa-solid fa-graduation-cap"></i>
+                ${course.name || course.title || 'كورس'}
+              </div>
+              <div class="course-detail-item">
+                <span class="course-detail-label"> عدد المحتويات:</span>
+                <span class="course-detail-value">${course.contant.length || course.id || '-'}</span>
+              </div>
+              <div class="course-detail-item">
+                <span class="course-detail-label">الوصف:</span>
+                <span class="course-detail-value">${course.description || '-'}</span>
+              </div>
+              <div class="course-detail-item">
+                <span class="course-detail-label">السعر:</span>
+                <span class="course-detail-value">${course.price || '-'} جنيه</span>
+              </div>
+            `;
+            coursesGrid.appendChild(courseCard);
+          });
+        } else {
+          coursesGrid.innerHTML = '<div class="no-courses"><i class="fa-solid fa-info-circle"></i> لا توجد كورسات مسجلة حالياً</div>';
+        }
+
+      // --- النتائج ---
+      const resultsTable = document.querySelector("#resultsTable tbody");
+      resultsTable.innerHTML = "";
+      
+      if (data.studentResult && data.studentResult.length > 0) {
+        data.studentResult.forEach(r => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${r.courseId || '-'}</td>
+            <td>امتحان</td>
+            <td><strong style="color: ${r.score >= 60 ? '#28a745' : r.score >= 50 ? '#ffc107' : '#dc3545'}">${r.score}</strong></td>
+            <td>${new Date(r.date).toLocaleDateString("ar-EG")}</td>
+          `;
+          resultsTable.appendChild(tr);
+        });
+      } else {
+        const tr = document.createElement("tr");
+        tr.innerHTML = '<td colspan="4" style="color: #6c757d; font-style: italic;"><i class="fa-solid fa-info-circle"></i> لا توجد نتائج متاحة</td>';
+        resultsTable.appendChild(tr);
+      }
+
+      // --- الحضور ---
+      const attendanceTable = document.querySelector("#attendanceTable tbody");
+      attendanceTable.innerHTML = "";
+      for (let i = 1; i <= 12; i++) {
+        const month = data.user[`month${i}`];
+        if (!month) continue;
+        const tr = document.createElement("tr");
+        tr.classList.add('month-row');
+        
+        let cellsHTML = `<td>الشهر ${i}</td>`;
+        
+        // خلايا الحضور
+        for (let h = 1; h <= 8; h++) {
+          const value = month[`h${h}`] || "";
+          const statusClass = value === "حاضر" ? "present" : value === "غائب" ? "absent" : "empty-attendance";
+          const displayText = value || "-";
+          cellsHTML += `
+            <td class="attendance-cell">
+              <span class="editable attendance-editable ${statusClass}" 
+                    data-month="${i}" 
+                    data-field="h${h}" 
+                    data-type="attendance">${displayText}</span>
+            </td>
+          `;
+        }
+        
+        // خلية الدفع
+        const paidValue = month.paid || "غير مدفوع";
+        const paidClass = paidValue === "مدفوع" ? "paid" : "unpaid";
+        cellsHTML += `
+          <td class="attendance-cell">
+            <span class="editable payment-editable ${paidClass}" 
+                  data-month="${i}" 
+                  data-field="paid" 
+                  data-type="payment">${paidValue}</span>
+          </td>
+        `;
+        
+        tr.innerHTML = cellsHTML;
+        attendanceTable.appendChild(tr);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("حدث خطأ أثناء تحميل البيانات");
+    }
+  }
+
+  // دالة لإنشاء قائمة الخيارات
+  function createOptionsMenu(options, currentValue, callback) {
+    const menu = document.createElement('div');
+    menu.className = 'options-menu';
+    
+    options.forEach(option => {
+      const optionDiv = document.createElement('div');
+      optionDiv.textContent = option.text;
+      optionDiv.style.fontWeight = option.value === currentValue ? 'bold' : 'normal';
+      optionDiv.addEventListener('click', () => {
+        callback(option.value, option.class);
+        menu.remove();
+      });
+      menu.appendChild(optionDiv);
+    });
+    
+    return menu;
+  }
+
+  // دالة لوضع قائمة الخيارات
+  function positionMenu(menu, element) {
+    const rect = element.getBoundingClientRect();
+    menu.style.position = 'fixed';
+    menu.style.top = (rect.bottom + 5) + 'px';
+    menu.style.left = rect.left + 'px';
+    document.body.appendChild(menu);
+  }
+
+  // معالج الأحداث الرئيسي
+  document.addEventListener("click", e => {
+    // إزالة أي قوائم خيارات مفتوحة
+    document.querySelectorAll('.options-menu').forEach(menu => menu.remove());
+    
+    if (e.target.classList.contains("editable")) {
+      // منع التحرير إذا كان هناك input مفتوح بالفعل
+      if (document.querySelector('.editing-input')) return;
+      
+      const element = e.target;
+      const currentValue = element.innerText;
+      const field = element.dataset.field;
+      const type = element.dataset.type;
+      
+      if (type === "attendance") {
+        // خيارات الحضور
+        const menu = createOptionsMenu(attendanceOptions, currentValue, (newValue, newClass) => {
+          element.innerText = newValue || "-";
+          applyStatusClass(element, newValue, false);
+          element.dataset.newValue = newValue;
+          saveBtn.style.display = "inline-block";
+        });
+        positionMenu(menu, element);
+        
+      } else if (type === "payment") {
+        // خيارات الدفع
+        const menu = createOptionsMenu(paymentOptions, currentValue, (newValue, newClass) => {
+          element.innerText = newValue;
+          applyStatusClass(element, newValue, true);
+          element.dataset.newValue = newValue;
+          saveBtn.style.display = "inline-block";
+        });
+        positionMenu(menu, element);
+        
+      } else {
+        // تحرير نصي عادي
+        const input = document.createElement("input");
+        input.value = currentValue;
+        input.className = "editing-input";
+        
+        // استبدال النص بـ input
+        const originalContent = element.innerHTML;
+        element.innerHTML = "";
+        element.appendChild(input);
+        input.focus();
+        input.select();
+        
+        const finishEditing = () => {
+          const newValue = input.value.trim() || currentValue;
+          element.innerHTML = newValue;
+          if (newValue !== currentValue) {
+            element.dataset.newValue = newValue;
+            saveBtn.style.display = "inline-block";
+          }
+        };
+        
+        input.addEventListener("blur", finishEditing);
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            finishEditing();
+          } else if (event.key === "Escape") {
+            element.innerHTML = originalContent;
+          }
+        });
+      }
+    }
+  });
+
+  // زر الحفظ
+  saveBtn.addEventListener("click", async () => {
+    const updates = {};
+
+    // بيانات الطالب
+    document.querySelectorAll(".editable").forEach(el => {
+      if (el.dataset.newValue !== undefined) {
+        const field = el.dataset.field;
+        const month = el.dataset.month;
+        
+        if (month) {
+          // بيانات الحضور
+          const monthKey = `month${month}`;
+          if (!updates[monthKey]) updates[monthKey] = {};
+          updates[monthKey][field] = el.dataset.newValue;
+        } else {
+          // بيانات الطالب العادية
+          updates[field] = el.dataset.newValue;
+        }
+      }
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return alert("لا توجد تعديلات للحفظ");
+    }
+
+    try {
+      const res = await fetch(`/admin/user/${userID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(updates)
+      });
+      const result = await res.json();
+      alert(result.msg || "تم حفظ التعديلات بنجاح");
+      saveBtn.style.display = "none";
+      
+      // إعادة تعيين البيانات
+      document.querySelectorAll(".editable").forEach(el => {
+        delete el.dataset.newValue;
+      });
+      
+      loadUserData();
+    } catch (err) {
+      console.error(err);
+      alert("فشل في حفظ التعديلات");
+    }
+  });
+
+  loadUserData();
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تفاصيل الطالب</title>
+  <style>
+    table {
+  border-collapse: collapse;
+  width: 95%;   
+  margin: 20px auto;
+  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  direction: rtl;
+}
+
+thead th {
+  background: #0091ff;
+  color: #fff;
+  padding: 12px;
+  font-size: 16px;
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+}
+
+tr:hover {
+
+  background: #ffffff5d;
+  transition: 1s;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  direction: rtl;
+  background-color: #f0f2f5;
+  margin: 0;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.info {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  line-height: 1.8;
+  width: 95%;
+  margin-right: 2.5%;
+}
+
+table {
+  width: 95%;  
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin: 20px auto;
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+th {
+  background-color: #f7f7f7;
+  color: #444;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+img {
+  max-width: 100px;
+  border-radius: 6px;
+}
+
+.correct {
+  background-color: #e6ffed;
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.incorrect {
+  background-color: #ffebee;
+  color: #c62828;
+  font-weight: bold;
+}
+
+.answer-value {
+  font-size: 0.85em;
+  color: #555;
+  margin-top: 4px;
+}
+
+  </style>
+</head>
+<body>
+    <div id="header"></div>
+  <h2>تفاصيل إجابات الطالب</h2>
+  <div id="studentInfo" class="info"></div>
+  <table id="answersTable">
+    <thead>
+      <tr>
+        <th>رقم السؤال</th>
+        <th>السؤال</th>
+        <th>إجابة الطالب</th>
+        <th>الإجابة الصحيحة</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <div id="footer"></div>
+  <script src="/header/header.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const quizId = params.get("quizId");
+    const studentId = params.get("id");
+
+    function formatChoiceLabel(key) {
+      const map = {
+        answer_1: "الاختيار أ",
+        answer_2: "الاختيار ب",
+        answer_3: "الاختيار ج",
+        answer_4: "الاختيار د"
+      };
+      return map[key] || key;
+    }
+
+    async function fetchStudentResult() {
+      try {
+        const response = await fetch(`/result?quizID=${quizId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) throw new Error("خطأ في جلب البيانات");
+
+        const results = await response.json();
+
+        const studentResult = results.find(r => {
+          return r.studentId?._id?.toString() === studentId || r.studentId?.toString() === studentId;
+        });
+
+        if (!studentResult) {
+          document.getElementById("studentInfo").innerText = "لم يتم العثور على بيانات الطالب.";
+          return;
+        }
+
+        document.getElementById("studentInfo").innerHTML = `
+          <strong>الاسم:</strong> ${studentResult.studentId?.name || "غير معروف"}<br>
+          <strong>الدرجة:</strong> ${studentResult.score || 0}<br>
+          <strong>التاريخ:</strong> ${studentResult.date ? new Date(studentResult.date).toLocaleString() : "-"}
+        `;
+
+        const tbody = document.querySelector("#answersTable tbody");
+        tbody.innerHTML = "";
+
+        if (studentResult.results && studentResult.results.length > 0) {
+          studentResult.results.forEach((item, index) => {
+            const isCorrect = item.isCorrect;
+            const rowClass = isCorrect ? "correct" : "incorrect";
+
+            const userKey = item.userAnswer || "-";
+            const correctKey = item.correctAnswer || "-";
+
+            const userLabel = formatChoiceLabel(userKey);
+            const correctLabel = formatChoiceLabel(correctKey);
+
+            const userValue = item.answers?.find(a => a.key === userKey)?.value || "";
+            const correctValue = item.answers?.find(a => a.key === correctKey)?.value || "";
+
+            let row = document.createElement("tr");
+            row.className = rowClass;
+            row.innerHTML = `
+              <td>${index + 1}</td>
+              <td><a href="${item.question}" target="_blank"><img src="${item.question}" alt="السؤال"></a></td>
+              <td>
+                ${userLabel}
+                <div class="answer-value">${userValue}</div>
+              </td>
+              <td>
+                ${correctLabel}
+                <div class="answer-value">${correctValue}</div>
+              </td>
+              <td>${isCorrect ? "✔️ صحيحة" : "❌ خاطئة"}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="5">لا توجد نتائج لعرضها</td></tr>`;
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("studentInfo").innerText = "حدث خطأ أثناء جلب البيانات.";
+      }
+    }
+
+    fetchStudentResult();
+  </script>
+</body>
+</html>

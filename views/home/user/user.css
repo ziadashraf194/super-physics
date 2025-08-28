@@ -1,0 +1,111 @@
+
+.row{
+    direction: rtl;
+    margin: 30px;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    margin-top: 50px !important;
+    padding: 20px;
+}
+.col-8{
+    /* margin-right: 20%; */
+}
+.title{
+    color: #0066ff;
+    text-align: center;
+    margin-top: 50px;
+}
+.user-img{
+    width: 200px;
+    height: 200px;
+    border: none !important;
+    /* margin-right: 35%; */
+    /* outline: none; */
+    align-self: center;
+}
+.data{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 1px 4px 8px rgba(0, 128, 255, 0.636);
+    text-align: center;
+    max-width: 800px;
+    margin: auto;
+}
+.name{
+    color: #0066ff;
+}
+.data div {
+    display:flex ;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+.data div h3{
+background-color: rgb(243 244 246);
+width: 120px ;
+height: 120px ;
+padding: 20px;
+border-radius: 10px;
+color: #232222;
+text-align: center;
+
+}
+.data-courses {
+    display: flex;
+    flex-direction:row ;
+    flex-wrap: wrap; 
+    gap: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 1px 4px 8px rgba(0, 128, 255, 0.636);
+    text-align: center;
+    max-width: 800px;
+    margin: auto;
+    justify-content: center;
+
+  }
+  
+  .data-courses .card {
+    flex: 1 1 250px; 
+    max-width: 300px; 
+  }
+  .data-courses .card a {
+    text-decoration: none !important;
+  }
+
+  .data-courses a {
+    text-decoration: none;
+    color: inherit; 
+    display: block; 
+  }
+  table {
+    border-collapse: collapse;
+    width: 85%;
+    margin: 20px auto;
+    text-align: center;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+    direction: rtl;
+  }
+
+  thead th {
+    background: #0091ff;
+    color: #fff;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+  }
+
+  tr:hover {
+    background: #f1f9ff;
+  }

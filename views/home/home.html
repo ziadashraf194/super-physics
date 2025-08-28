@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" contant="width=device-width, initial-scale=1.0">
+    <title>الرئيسية</title>
+    <link rel="stylesheet" href="/header/style.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
+</head>
+<body>
+    <div id="header"></div>
+<div class="heade">
+    <div class="heade-text">
+        <h3><span>You learn</span> اهلا بك في </h3>
+        <div class="btns-home">
+    
+          <a href="./user/user.html">   <button type="button" class="btn btn-primary btn-lg"><i class="fa-solid fa-book-open-reader fa-beat-fade fa-lg" style="color: #fff;"></i>حسابي <i class="fa-solid fa-book-open-reader fa-beat-fade fa-lg" style="color: #fff;"></i></button></a>
+          <a href="/home/allCourses.html" class="btn btn-outline-info">جميع الكورسات</a>
+
+    </div>
+    </div>
+    <div class="heade-img">
+        <img src="/imge/home.svg" alt="">
+    </div>
+</div>
+
+<div class="card-deck"></div>
+<h3 style="text-align: center;margin: 10px;">احدث الكورسات</h3>
+    <div class="swiper-div" ></div>
+
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+   
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
+    <div class="rank-section">
+      <h2 class="animate__animated animate__fadeInDown">🏆 أوائل الطلاب</h2>
+  
+      <div class="top-students" id="topStudents"></div>
+  
+      <button class="btn btn-primary view-all" id="toggleBtn">
+        <i class="fa-solid fa-list"></i> عرض الكل
+      </button>
+  
+      <div class="students-table" id="studentsTable">
+        <table class="table table-striped table-bordered">
+          <thead>
+            <tr>
+              <th>المركز</th>
+              <th>الاسم</th>
+              <th>الدرجة</th>
+            </tr>
+          </thead>
+          <tbody id="studentsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  
+    <!-- JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  
+
+
+
+
+    
+    <div id="footer"></div>
+    <script>
+    
+    cardDeck = document.querySelector(".card-deck")
+
+    async function checkToken() {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+  
+        try {
+          const res = await fetch("/api/verify", {
+            method: "POST",
+            headers: {
+              "contant-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          });
+  
+          if (res.ok) {
+        
+         
+           
+          } else {
+           
+            localStorage.removeItem("token");
+            window.location.href = "/login/index.html";
+
+          }
+        } catch (err) {
+          console.error("خطأ في التحقق من التوكن", err);
+          localStorage.removeItem("token");
+        }
+        return token
+      }
+  
+      checkToken(); 
+
+
+      async function fetchCourses() {
+    try {
+      const response = await fetch('/api/courses'); 
+      const courses = await response.json();
+     
+for (let i = 0; i < 3; i++) {
+  cardDeck.innerHTML +=`
+
+<a href="/home/Course.html?id=${courses[i]._id}">
+    <div class="card">
+     <div class="badge">HOT SALE</div>
+     <div class="tilt">
+      <div class="img"><img src="/${courses[i].image}" alt=""></div>
+     </div>
+     <div class="info">
+     
+      <h2 class="title">${courses[i].title}</h2>
+      <p class="desc">${courses[i].description}</p>
+      <div class="bottom">
+       <div class="price">
+      
+        <span class="new">${courses[i].price} LE</span>
+       </div>
+      </div>
+     
+      </div>
+     </div>
+    </div>
+    </a>
+
+  `
+  
+}
+
+
+let swiperDiv = document.querySelector('.swiper-wrapper')
+const lastThree = courses.slice(-3); 
+
+for (let index = 0; index < lastThree.length; index++)  {
+  swiperDiv.innerHTML += `
+    
+<div class="swiper-slide"><a href="/home/Course.html?id=${lastThree[index]._id}">  <img id="img" class="slide-img" src="/${lastThree[index].image}" alt="" stylee="    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;" ></a> </div>      
+     
+  `;
+}
+var swiper = new Swiper(".mySwiper", {
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+        renderBullet: function (index, className) {
+          return '<span class="' + className + '">' + (index + 1) + "</span>";
+        },
+      },
+    });
+
+
+
+
+      
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  fetchCourses();
+  btnsHome=document.querySelector(".btns-home")
+
+ 
+  async function checkToken() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch("/api/verify", {
+          method: "POST",
+          headers: {
+            "contant-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
+        if (res.ok) {
+       
+        
+
+        } else {
+          localStorage.removeItem("token");
+          btnsHome.innerHTML=`
+          
+            <a href="/register/index.html"> <button type="button" class="btn btn-outline-primary" >إنشاء حساب</button></a>
+            <a href="/login/index.html" ><button type="button" class="btn btn-outline-secondary">تسجيل الدخول</button></a>
+         `
+        }
+        
+       
+      } catch (err) {
+        console.error("خطأ في التحقق من التوكن", err);
+        localStorage.removeItem("token");
+      }
+    }
+
+    checkToken();
+
+
+  </script>
+</script>  
+<script>
+  AOS.init({ duration: 1200, once: true });
+
+  const topStudentsDiv = document.getElementById("topStudents");
+  const studentsBody = document.getElementById("studentsBody");
+  const btn = document.getElementById("toggleBtn");
+  const table = document.getElementById("studentsTable");
+
+  async function loadRank() {
+    try {
+      const res = await fetch("/rank");
+      const users = await res.json();
+
+      if (!Array.isArray(users)) return;
+
+      const top3 = users.slice(0, 3);
+      const colors = ["first", "second", "third"];
+      const icons = ["fa-trophy", "fa-medal", "fa-award"];
+      const medals = ["🥇", "🥈", "🥉"];
+
+      top3.forEach((u, i) => {
+        const card = `
+          <div class="card-student ${colors[i]}" data-aos="fade-up" data-aos-delay="${100 * (i+1)}">
+            <i class="fa-solid ${icons[i]}"></i>
+            <h3>${medals[i]} المركز ${i+1}</h3>
+            <p> ${u.name}</p>
+            <p>الدرجات: ${u.points || 0 }</p>
+          </div>
+        `;
+        topStudentsDiv.insertAdjacentHTML("beforeend", card);
+      });
+
+      users.forEach((u, i) => {
+        studentsBody.insertAdjacentHTML("beforeend", `
+          <tr>
+            <td>${i === 0 ? `<i class="fa-solid fa-trophy fa-xl" style="color: #FFD43B;"></i>` : i === 1 ? `<i class="fa-solid fa-trophy fa-xl" style="color: #a0a6a5;"></i>` : i === 2 ? `<i class="fa-solid fa-xl fa-trophy" style="color: #d18400;"></i>` : i+1}</td>
+            <td>${u.name}</td>
+            <td>${u.points}</td>
+          </tr>
+          
+        `) 
+      });
+    } catch (err) {
+      console.error("خطأ في جلب البيانات:", err);
+    }
+  }
+
+  loadRank();
+
+  btn.onclick = () => {
+    table.classList.toggle("show");
+    btn.innerHTML = table.classList.contains("show")
+      ? '<i class="fa-solid fa-eye-slash"></i> إخفاء القائمة'
+      : '<i class="fa-solid fa-list"></i> عرض الكل';
+  };  
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="/header/header.js"></script>
+</body>
+</html>

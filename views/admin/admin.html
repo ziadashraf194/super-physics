@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="admin.css">
+    <title>admin</title>
+</head>
+<body>
+    <div id="header"></div>
+<div class="contaner">
+    <div class="courses" onclick="window.location.href='/admin/courses.html'">
+        <h3>الكورسات</h3>
+    </div>
+    <div class="results"onclick="window.location.href='/admin/quiz.html'">
+        <h3>الامتحانات </h3>
+    </div>
+    <div class="students" onclick="window.location.href='/admin/allUsers.html?page=1'">
+        <h3>قائمة الطلاب</h3>
+    </div>
+</div>
+    <div id="footer"></div>
+    <script src="/header/header.js"></script>
+    <script>
+        async function init() {
+          const token = localStorage.getItem('token'); 
+      
+          function parseJwt(token) {
+            try {
+              const base64Url = token.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(
+                atob(base64)
+                  .split('')
+                  .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+              );
+              return JSON.parse(jsonPayload);
+            } catch (e) {
+              console.error('خطأ في فك التوكن:', e);
+              return null;
+            }
+          }
+      
+          const userId = token ? parseJwt(token)?.id : null;
+        
+      
+          async function checkAdmin() {
+            if (!userId) return false;
+      
+            try {
+              const response = await fetch(`/api/verify/admin/${userId}`, {
+                method: "POST",
+                headers: {
+                  "Authorization": `Bearer ${token}`,
+                }
+              });
+      
+              let data;
+              try {
+                data = await response.json();
+              } catch(e) {
+                console.error("الرد ليس JSON:", await response.text());
+                return false;
+              }
+      
+              if (response.ok) {
+                return data.isAdmin === true;
+              } else {
+                return false;
+              }
+            } catch (err) {
+              console.error("فشل الاتصال بالسيرفر", err);
+              return false;
+            }
+          }
+      
+          const isAdmin = await checkAdmin();
+          if (!isAdmin) {
+            window.location.href = "/404.html";
+          }
+        }
+      
+        init();
+      </script>
+      
+</body>
+</html>

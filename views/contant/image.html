@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>عرض صورة الكورس</title>
+  <link rel="stylesheet" href="image.css">
+  <link rel="stylesheet" href="/home/Course.css">
+  <script src="https://kit.fontawesome.com/your-fontawesome-kit.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <style>
+          .contant{
+    margin: auto;
+    box-shadow: 3px 5px 5px 3px rgb(212 212 212) !important;
+  }
+  .contant-div{
+    box-shadow: 3px 5px 5px 3px rgb(212 212 212);
+  }
+  .contant-div p{
+    direction: rtl;
+    align-self: center;
+  }
+    </style>
+  <div id="header"></div>
+
+  <div id="image-title"></div>
+  <div id="image-box" style="text-align:center; margin:20px 0;"></div>
+  <div class="contant"></div>
+
+  <div id="footer"></div>
+  <script src="/header/header.js"></script>
+
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const imageId  = params.get("id");
+    const courseId = params.get("course");
+
+    const imageTitle = document.getElementById("image-title");
+    const imageBox   = document.getElementById("image-box");
+    const contant    = document.querySelector(".contant");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "/login/index.html";
+    }
+
+    // --- جلب الصورة ---
+    async function getContant(courseID, imageId) {
+      try {
+        const response = await fetch(`/${courseID}/${imageId}`, {
+          method: "GET",
+          headers: {
+            "content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          alert(data.msg || "حدث خطأ");
+          return;
+        }
+
+        if (imageTitle) {
+          imageTitle.innerHTML = `${data.contant.title} <i class="fa-solid fa-image" style="color: #ffffff;"></i>`;
+        }
+
+        if (!data.contant.url) {
+          alert("لا يوجد رابط للصورة");
+          return;
+        }
+
+        imageBox.innerHTML = `
+          <img src="${data.contant.url}" alt="${data.contant.title}" style="max-width:90%; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.2);" />
+        `;
+      } catch (error) {
+        console.error("Error:", error);
+        alert("فشل الاتصال بالسيرفر");
+      }
+    }
+
+    getContant(courseId, imageId);
+
+    // --- جلب قائمة المحتوى ---
+    fetch(`/${courseId}/contant`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(response => {
+      if (response.status === 401) {
+        contant.innerHTML = `
+          <button id="popup-subscribe-btn" class="btn btn-primary btn-lg btn-block"
+            onclick="window.location.href='/login/index.html'">
+            سجل الدخول لرؤية المحتوي
+          </button>
+        `;
+        return;
+      }
+      if (!response.ok) throw new Error("حدث خطأ أثناء جلب البيانات");
+      return response.json();
+    })
+    .then(data => {
+      const contantArray = data.contant;
+      for (let item of contantArray) {
+        if (!item.url) {
+          item.url = `/home/Course.html?id=${courseId}`;
+        }
+
+        let icon = "fa-file";
+        if (item.type === "video") {
+          icon = "fa-circle-play";
+        } else if (item.type === "pdf") {
+          icon = "fa-file-lines";
+        } else if (item.type === "image") {
+          icon = "fa-image";
+        }
+
+        contant.innerHTML += `
+          <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
+            <p id="${item.type}">
+              <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}
+            </p>
+          </div>
+        `;
+      }
+    })
+    .catch(err => {
+      console.error("خطأ:", err.message);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+/* 🎨 ألوان أساسية */
+:root {
+  --primary: #007bff;
+  --secondary: #6c757d;
+  --success: #28a745;
+  --danger: #dc3545;
+  --text-dark: #333;
+  --bg-light: #f9f9f9;
+  --white: #fff;
+  --radius: 10px;
+  --transition: 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Tahoma", Arial, sans-serif;
+  height: 100vh;
+  direction: rtl;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* 📦 الحاوية الأساسية */
+.quiz-app {
+  margin: 20px auto;
+  max-width: 850px;
+  background: var(--white);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: var(--transition);
+}
+
+/* 📌 معلومات الكويز */
+.quiz-info {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background: var(--bg-light);
+  border-radius: var(--radius);
+  margin-bottom: 15px;
+}
+
+.quiz-info .category,
+.quiz-info .count {
+  font-weight: bold;
+  font-size: 15px;
+  color: var(--text-dark);
+}
+
+/* ❓ السؤال */
+.quiz-area {
+  background: var(--white);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.quiz-area h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--primary);
+}
+
+/* ✅ الاختيارات */
+.answers-area {
+  background: var(--white);
+  padding: 10px 20px 20px;
+}
+
+.answers-area .answer {
+  background: #fdfdfd;
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  transition: var(--transition);
+}
+
+.answers-area .answer:hover {
+  background: #f0f8ff;
+  border-color: var(--primary);
+}
+
+.answers-area input[type="radio"]:checked + label {
+  color: var(--primary);
+}
+
+.answers-area label {
+  cursor: pointer;
+  font-weight: 600;
+  color: #555;
+  font-size: 15px;
+}
+
+/* ⏱️ العداد */
+.countdown {
+  font-size: 22px;
+  text-align: center;
+  margin: 20px 0;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+/* 📌 أزرار */
+.submit-button,
+.back-button {
+  display: inline-block;
+  width: 48%;
+  padding: 14px;
+  border: none;
+  color: var(--white);
+  font-weight: bold;
+  font-size: 17px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: var(--transition);
+  text-align: center;
+}
+
+.submit-button {
+  background: var(--primary);
+  margin-left: 10px;
+}
+.submit-button:hover {
+  background: #0056b3;
+
+}
+
+.back-button {
+  background: var(--secondary);
+}
+.back-button:hover {
+  background: #5a6268;
+}
+
+
+.bullets {
+  margin: 20px auto;
+  padding: 15px;
+  background: var(--bg-light);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.bullets .spans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.bullets .spans span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.bullets .spans span:hover {
+  transform: scale(1.1);
+}
+
+.bullets .spans span.on {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.bullets .spans span.answered {
+  background: var(--success);
+  color: var(--white);
+}
+
+/* 🎯 النتيجة */
+.results span {
+  font-weight: bold;
+}
+.results span.bad {
+  color: var(--danger);
+}
+.results span.good {
+  color: var(--success);
+}
+.results span.perfect {
+  color: var(--primary);
+}
+
+/* 🖼️ صورة السؤال */
+.question-img {
+  max-width: 100%;
+  border: 2px solid var(--primary);
+  border-radius: var(--radius);
+  margin-bottom: 15px;
+}
