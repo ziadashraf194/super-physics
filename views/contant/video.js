@@ -1,6 +1,8 @@
 const params = new URLSearchParams(window.location.search);
 const vedioId = params.get("id");
 const courseId = params.get("course");
+const popText = document.querySelector(".modal-body")
+var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
 
 const videoTitle = document.getElementById("video-title");
 
@@ -31,7 +33,8 @@ async function getContant(courseID, vedioId) {
 
 
     if (!response.ok) {
-      alert(data.msg || "حدث خطأ");
+        popText.innerText=`${ data.msg || "حدث خطأ"}`
+         myModal.show();
       return;
     }
 

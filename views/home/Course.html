@@ -150,15 +150,13 @@ let userSub = false
       } 
       for (let item of contentArray) {
       
-    if(item.type=="video"){
-      icon="fa-circle-play"
-    }else if (item.type=="pdf"){
-       icon="fa-file-lines"
-    }else if (item.type=="image") {
-       icon="fa-image"
-    }else{
-       icon="fa-question"
-    }
+  if(item.type == "video") {
+          icon = "fa-circle-play"
+        } else if(item.type == "pdf") {
+          icon = "fa-file-lines"
+        } else {
+          icon = "fa-image"
+        }
         Sup().then(result => {
 if (result===true) {
          contant.innerHTML += `

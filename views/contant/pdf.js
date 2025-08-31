@@ -2,11 +2,11 @@
     const params = new URLSearchParams(window.location.search);
     const pdfId = params.get("id");
     const courseId = params.get("course");
-
     const pdfTitle = document.getElementById("pdf-title");
     const pdfBox   = document.getElementById("pdf-box");
     const contant  = document.querySelector(".contant");
-
+    const popText = document.querySelector(".modal-body")
+    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
     const token = localStorage.getItem("token");
     if (!token) {
       window.location.href = "/login/index.html";
@@ -33,7 +33,8 @@
         const data = await response.json();
 
         if (!response.ok) {
-          alert(data.msg || "حدث خطأ");
+          popText.innerText=`${data.msg}`
+         myModal.show();
           return;
         }
 
@@ -54,7 +55,9 @@
         pdfBox.innerHTML = `<iframe src="${iframeUrl}"  allow="autoplay"></iframe>`;
       } catch (error) {
         console.error("Error:", error);
-        alert("فشل الاتصال بالسيرفر");
+        popText.innerText=`حدث خطاء`
+         myModal.show();
+         return
       }
     }
 

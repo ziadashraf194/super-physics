@@ -7,6 +7,8 @@ let answersArea = document.querySelector(".answers-area");
 let submitButton = document.querySelector(".submit-button");
 let resultsContainer = document.querySelector(".results");
 let countdownElement = document.querySelector(".countdown");
+const popText = document.querySelector(".modal-body")
+var myModal = new bootstrap.Modal(document.getElementById('exampleModal'));
 
 // ------------------- Back Button -------------------
 let backButton = document.createElement("button");
@@ -30,7 +32,7 @@ function parseJwt(token) {
     );
     return JSON.parse(jsonPayload);
   } catch (e) {
-    console.error('خطأ في فك التوكن:', e);
+   window.location.href = `${window.location.origin}/login/index.html`;
     return null;
   }
 }
@@ -97,7 +99,7 @@ function updateBulletsState() {
 async function getQuestions() {
   try {
     if (!token) {
-      window.location.href = "/login/index.html";
+      window.location.href = `${window.location.origin}/login/index.html`;
       return;
     }
 
@@ -112,7 +114,8 @@ async function getQuestions() {
     if (!response.ok) {
       const text = await response.text();
       console.error("Error fetching quiz:", text);
-      alert("حدث خطأ أثناء جلب الكويز");
+      popText.innerText=`حدث خطاء`
+         myModal.show();
       return;
     }
 
@@ -151,7 +154,8 @@ async function getQuestions() {
 
   } catch (error) {
     console.error("Error:", error);
-    alert("فشل الاتصال بالسيرفر");
+     popText.innerText=`حدث خطاء`
+         myModal.show();
   }
 }
 
