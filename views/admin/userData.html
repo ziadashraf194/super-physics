@@ -305,7 +305,7 @@
       document.getElementById("userGrad").innerText = data.user.grad;
       document.getElementById("userPoints").innerText = data.user.points;
       document.getElementById("userCenterId").innerText = data.user.centerId;
-      document.getElementById("userImage").src = "http://localhost:4000" + (data.user.Image || "/uploads/defaultUser.png");
+      document.getElementById("userImage").src = "/" + (data.user.Image || "/uploads/defaultUser.png");
 
       // --- الكورسات المشترك بها ---
       const coursesGrid = document.getElementById("coursesGrid");
