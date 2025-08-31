@@ -27,7 +27,7 @@
   <div class="popup-overlay" id="popup" style="display:none;">
     <div class="popup-box">
       <i onclick="closePopup()" class="fa-regular fa-circle-xmark fa-2xl close-btn"></i>
-      <h3>ادخل كود السنتر</h3>
+      <h3 id="supMsg">ادخل كود السنتر</h3>
       <input type="text" id="coupon-input" placeholder="ادخل الكود ">
       <button id="popup-subscribe-btn">اشتراك</button>
       <p id="popup-message" style="color:red; font-size:14px;"></p>
@@ -38,6 +38,7 @@
   <script src="/header/header.js"></script>
 
   <script>
+ 
     // --- Helpers ---
     function openPopup() {
       document.getElementById("popup").style.display = "flex";
@@ -86,6 +87,7 @@ document.getElementById("popup-subscribe-btn").onclick = () => {
         document.getElementById('title').textContent = course.title;
         document.getElementById('description').textContent = course.description;
         document.getElementById("image").src = `/${course.image}`;
+        RenderCourse(course);
       })
       .catch(err => {
         document.getElementById('title').textContent = 'حدث خطأ';
@@ -182,46 +184,58 @@ if (result===true) {
     });
 
   
+ function RenderCourse(course) {
+    console.log("استخدمت الكورس:",course.price);
+
+    // لو الكورس مجاني اخفي الكوبون
+    if(course.price == 0) {
+      document.getElementById("coupon-input").style.display = "none";
+      document.getElementById('supMsg').innerText= "اشترك مجانا"
+    }
 
     // --- الاشتراك باستخدام الكوبون ---
-    document.getElementById("popup-subscribe-btn").addEventListener("click", () => {
-      const couponCode = document.getElementById("coupon-input").value.trim();
+    document.getElementById("popup-subscribe-btn").addEventListener("click",() => {
+      let couponCode = document.getElementById("coupon-input").value.trim();
+
+      if(course.price == 0) {
+        couponCode = "free";
+      }
+
       const message = document.getElementById("popup-message");
       message.textContent = "";
 
-      if (!couponCode) {
+      if(!couponCode) {
         message.textContent = "من فضلك ادخل الكود";
         return;
       }
 
-      fetch(`/subscribe/${courseId}/${couponCode}`, {
+      fetch(`/subscribe/${courseId}/${couponCode}`,{
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.message && data.message.includes("success")) {
-          message.style.color = "green";
-          message.textContent = "تم الاشتراك بنجاح";
-          subscribeBtn.innerText = "مشترك";
-          subscribeBtn.style.backgroundColor = "green";
-          setTimeout(() => closePopup(), 500);
-          location.reload();
-        } else {
+        .then(res => res.json())
+        .then(data => {
+          if(data.message && data.message.includes("success")) {
+            message.style.color = "green";
+            message.textContent = "تم الاشتراك بنجاح";
+            subscribeBtn.innerText = "مشترك";
+            subscribeBtn.style.backgroundColor = "green";
+            setTimeout(() => closePopup(),500);
+            location.reload();
+          } else {
+            message.style.color = "red";
+            message.textContent = data.message || "فشل الاشتراك";
+          }
+        })
+        .catch(err => {
           message.style.color = "red";
-          message.textContent = data.message || "فشل الاشتراك";
-        }
-      })
-      .catch(err => {
-        message.style.color = "red";
-        message.textContent = "خطأ في السيرفر";
-      });
+          message.textContent = "خطأ في السيرفر";
+        });
     });
-
-
+  }
 
 
 

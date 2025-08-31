@@ -57,6 +57,12 @@
 let coursesContainer = document.querySelector('.data-courses'); 
 let studentResult = document.querySelector(".data-studentResult")
 
+  const token = localStorage.getItem("token")
+  console.log(token)
+  if(token==null) {
+    window.location.href = "/login/index.html";
+
+  }
 fetch("/user", {
   method: "GET",
   headers: {
@@ -71,8 +77,6 @@ fetch("/user", {
     return response.json();
   })
   .then(data => {
-   
-
     // عرض بيانات البروفايل
     profileData.innerHTML = `
       <img class="user-img img-thumbnail" src="${data.user.Image}" alt="">

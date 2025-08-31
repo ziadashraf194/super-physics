@@ -255,6 +255,8 @@ app.put('/courses/:id', async (req, res) => {
     }
   });
                                     //==================subscribe====================\\
+   
+   
   app.post("/subscribe/:courseId/:couponCode", async (req, res) => {
  // const userId = req.body._id;
   const courseId = req.params.courseId;
@@ -268,12 +270,27 @@ app.put('/courses/:id', async (req, res) => {
   const token = authHeader.split(" ")[1];
   let decoded;
 
+  // console.log(token)
+  // console.log(decoded.id)
+
+
+
+
   try {
     decoded = jwt.verify(token, SECRET);
   } catch (err) {
     return res.status(401).json({ msg: "توكن غير صالح أو منتهي" });
   }
   const userId = decoded.id;
+  if (0==0) {
+  await Course.findByIdAndUpdate(courseId, {
+      $addToSet: { users: userId }
+    });
+  return res.status(200).json({ message: "User subscribed successfully using coupon" });
+
+} 
+
+
   try {
     // التحقق من الكوبون
     const coupon = await Coupon.findOne({
@@ -293,7 +310,6 @@ app.put('/courses/:id', async (req, res) => {
     }
     
 
-    // الاشتراك في الكورس
     await Course.findByIdAndUpdate(courseId, {
       $addToSet: { users: userId }
     });
@@ -410,17 +426,24 @@ app.get("/:courseID/contant", async (req, res) => {
     if (!course) {
       return res.status(404).json({ msg: "الكورس غير موجود" });
     }
-
+if (decoded.role=="admin") {
+   res.status(200).json({
+  contant: course.contant
+});
+  
+} else {
   res.status(200).json({
   contant: course.contant.filter(item => item.active === true)
-});
+}); 
+
+} 
+
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "حدث خطأ أثناء جلب البيانات", error: error.message });
   }
 });
-
 app.get("/:courseID/:contantID", async (req, res) => {
   const { courseID, contantID } = req.params;
   const authHeader = req.headers.authorization;
@@ -610,6 +633,7 @@ app.put("/courses/:courseID/contants/:contantID", async (req, res) => {
     if (req.body.type !== undefined) contant.type = req.body.type;
     if (req.body.url !== undefined) contant.url = req.body.url;
     if (req.body.duration !== undefined) contant.duration = req.body.duration;
+    if (req.body.active !== undefined) contant.active = req.body.active;
     if (req.body.exam_duration !== undefined) contant.exam_duration = req.body.exam_duration;
     if (req.body.questions !== undefined) {
       // فلتر الأسئلة الفارغة
