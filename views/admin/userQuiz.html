@@ -145,7 +145,7 @@ img {
 
     async function fetchStudentResult() {
       try {
-        const response = await fetch(`/result?quizID=${quizId}`, {
+        const response = await fetch(`${window.location.origin}/result?quizID=${quizId}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" }
         });

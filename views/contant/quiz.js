@@ -101,7 +101,7 @@ async function getQuestions() {
       return;
     }
 
-    const response = await fetch(`/${courseId}/${quizID}`, {
+    const response = await fetch(`${window.location.origin}/${courseId}/${quizID}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -346,7 +346,7 @@ async function showResults(count) {
     resultsContainer.innerHTML = `<h2>${quizData.contant.title}</h2>` + theResults;
 
     // إرسال النتائج للسيرفر
-    const response = await fetch(`/result?=${quizID}`, {
+    const response = await fetch(`${window.location.origin}/result?=${quizID}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

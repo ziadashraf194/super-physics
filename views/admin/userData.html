@@ -293,7 +293,7 @@
 
   async function loadUserData() {
     try {
-      const res = await fetch(`/admin/user/${userID}`, {
+      const res = await fetch(`${window.location.origin}/admin/user/${userID}`, {
         headers: { "Authorization": "Bearer " + token }
       });
       if (!res.ok) throw new Error("فشل في جلب البيانات");
@@ -531,7 +531,7 @@
     }
 
     try {
-      const res = await fetch(`/admin/user/${userID}`, {
+      const res = await fetch(`${window.location.origin}/admin/user/${userID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
         body: JSON.stringify(updates)

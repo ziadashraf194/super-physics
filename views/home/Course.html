@@ -78,7 +78,7 @@ document.getElementById("popup-subscribe-btn").onclick = () => {
     }
 
     // --- جلب بيانات الكورس ---
-    fetch(`/courses/${courseId}`)
+    fetch(`${window.location.origin}/courses/${courseId}`)
       .then(res => {
         if (!res.ok) throw new Error('الكورس غير موجود');
         return res.json();
@@ -97,7 +97,7 @@ document.getElementById("popup-subscribe-btn").onclick = () => {
 
 let userSub = false
   function Sup() {
-    return fetch(`/subscribe/${courseId}/${userId}`)
+    return fetch(`${window.location.origin}/subscribe/${courseId}/${userId}`)
       .then(res => res.json())
       .then(data => {
         if(data.msg) {
@@ -127,7 +127,7 @@ let userSub = false
 
 
     // --- جلب محتوى الكورس ---
-    fetch(`/${courseId}/contant`, {
+    fetch(`${window.location.origin}/${courseId}/contant`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`
@@ -209,7 +209,7 @@ if (result===true) {
         return;
       }
 
-      fetch(`/subscribe/${courseId}/${couponCode}`,{
+      fetch(`${window.location.origin}/subscribe/${courseId}/${couponCode}`,{
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

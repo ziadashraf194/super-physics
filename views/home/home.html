@@ -79,7 +79,7 @@
         if (!token) return;
   
         try {
-          const res = await fetch("/api/verify", {
+          const res = await fetch(`${window.location.origin}/api/verify`, {
             method: "POST",
             headers: {
               "contant-Type": "application/json",
@@ -109,7 +109,7 @@
 
       async function fetchCourses() {
     try {
-      const response = await fetch('http://72.60.46.23/api/courses'); 
+      const response = await fetch(`${window.location.origin}/api/courses`); 
       const courses = await response.json();
      
 for (let i = 0; i < 3; i++) {
@@ -183,7 +183,7 @@ var swiper = new Swiper(".mySwiper", {
       if (!token) return;
 
       try {
-        const res = await fetch("/api/verify", {
+        const res = await fetch(`${window.location.origin}/api/verify`, {
           method: "POST",
           headers: {
             "contant-Type": "application/json",
@@ -226,7 +226,7 @@ var swiper = new Swiper(".mySwiper", {
 
   async function loadRank() {
     try {
-      const res = await fetch("/rank");
+      const res = await fetch(`${window.location.origin}/rank`);
       const users = await res.json();
 
       if (!Array.isArray(users)) return;

@@ -63,7 +63,7 @@ let studentResult = document.querySelector(".data-studentResult")
     window.location.href = "/login/index.html";
 
   }
-fetch("/user", {
+fetch(`${window.location.origin}/user`, {
   method: "GET",
   headers: {
     "Authorization": "Bearer " + localStorage.getItem("token"),

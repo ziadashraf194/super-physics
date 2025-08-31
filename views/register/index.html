@@ -38,7 +38,7 @@
       if (!token) return;
 
       try {
-        const res = await fetch("/api/verify", {
+        const res = await fetch(`${window.location.origin}/api/verify`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -74,7 +74,7 @@
       };
 
       try {
-        const response = await fetch("/api/register", {
+        const response = await fetch(`${window.location.origin}/api/register`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"

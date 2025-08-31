@@ -22,7 +22,7 @@
 
     async function getContant(courseID, pdfId) {
       try {
-        const response = await fetch(`/${courseID}/${pdfId}`, {
+        const response = await fetch(`${window.location.origin}/${courseID}/${pdfId}`, {
           method: "GET",
           headers: {
             "contant-Type": "application/json",
@@ -60,7 +60,7 @@
 
     getContant(courseId, pdfId);
 
-    fetch(`/${courseId}/contant`, {
+    fetch(`${window.location.origin}/${courseId}/contant`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`

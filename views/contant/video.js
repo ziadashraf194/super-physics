@@ -19,7 +19,7 @@ async function getContant(courseID, vedioId) {
       return;
     }
 
-    const response = await fetch(`/${courseID}/${vedioId}`, {
+    const response = await fetch(`${window.location.origin}/${courseID}/${vedioId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -74,7 +74,7 @@ const token = localStorage.getItem("token");
 
 
     // --- جلب محتوى الكورس ---
-    fetch(`/${courseId}/contant`, {
+    fetch(`${window.location.origin}/${courseId}/contant`, {
       method: "GET",
       headers: {
         "Authorization": `Bearer ${token}`

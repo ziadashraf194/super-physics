@@ -24,7 +24,7 @@ async function checkAdmin() {
   if (!userId) return false;
 
   try {
-    const response = await fetch(`/api/verify/admin/${userId}`, {
+    const response = await fetch(`${window.location.origin}/api/verify/admin/${userId}`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${authToken}`,

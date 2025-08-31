@@ -93,7 +93,7 @@ min-height: fit-contant;
             if (!userId) return false;
       
             try {
-              const response = await fetch(`/api/verify/admin/${userId}`, {
+              const response = await fetch(`${window.location.origin}/api/verify/admin/${userId}`, {
                 method: "POST",
                 headers: {
                   "Authorization": `Bearer ${token}`,
@@ -137,7 +137,7 @@ min-height: fit-contant;
             if (!token) return;
       
             try {
-              const res = await fetch("/api/verify", {
+              const res = await fetch(`${window.location.origin}/api/verify`, {
                 method: "POST",
                 headers: {
                   "contant-Type": "application/json",
@@ -166,7 +166,7 @@ min-height: fit-contant;
     
           async function fetchCourses() {
         try {
-          const response = await fetch('/api/courses'); 
+          const response = await fetch(`${window.location.origin}/api/courses`); 
           const courses = await response.json();
      
     for (let i = 0; i < courses.length; i++) {
@@ -236,7 +236,7 @@ courseForm.onsubmit = async (e) => {
   const formData = new FormData(courseForm);
 
   try {
-    const response = await fetch("/courses", {
+    const response = await fetch(`${window.location.origin}/courses`, {
       method: "POST",
       body: formData
     });

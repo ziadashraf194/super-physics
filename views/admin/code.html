@@ -211,7 +211,7 @@ background:#fff; padding:25px 30px; box-shadow:0 0 20px rgba(0,0,0,0.2); z-index
             if (!userId) return false;
       
             try {
-              const response = await fetch(`/api/verify/admin/${userId}`, {
+              const response = await fetch(`${window.location.origin}/api/verify/admin/${userId}`, {
                 method: "POST",
                 headers: {
                   "Authorization": `Bearer ${token}`,
@@ -252,7 +252,7 @@ background:#fff; padding:25px 30px; box-shadow:0 0 20px rgba(0,0,0,0.2); z-index
 
   async function fetchCoupons() {
     try {
-      const response = await fetch(`/coupon?courseId=${courseId}`);
+      const response = await fetch(`${window.location.origin}/coupon?courseId=${courseId}`);
 
       if (!response.ok) {
         throw new Error("فشل في جلب البيانات");
@@ -306,7 +306,7 @@ background:#fff; padding:25px 30px; box-shadow:0 0 20px rgba(0,0,0,0.2); z-index
     // تعديل زر التعديل في الجدول ليتم تمرير الـ ID كـ string
     async function fetchCoupons() {
         try {
-            const response = await fetch(`/coupon?courseId=${courseId}`, {
+            const response = await fetch(`${window.location.origin}/coupon?courseId=${courseId}`, {
                 headers: {
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                 }
@@ -372,7 +372,7 @@ async function saveCoupon() {
   };
 
   try {
-    const response = await fetch(`/coupon/${id}`, {
+    const response = await fetch(`${window.location.origin}/coupon/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -404,7 +404,7 @@ async function deleteCoupon() {
   if (!confirmDelete) return;
 
   try {
-    const response = await fetch(`/coupon/${id}`, {
+    const response = await fetch(`${window.location.origin}/coupon/${id}`, {
       method: "DELETE",
       headers: {
         "Authorization": `Bearer ${token}`
@@ -447,7 +447,7 @@ async function createCoupons() {
   }
 
   try {
-    const response = await fetch(`/coupon/${courseId}/${count}`, {
+    const response = await fetch(`${window.location.origin}/coupon/${courseId}/${count}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

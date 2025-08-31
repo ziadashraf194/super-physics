@@ -49,7 +49,7 @@
       try {
        
 
-        const response = await fetch(`/result?quizID=${quizID}`, {
+        const response = await fetch(`${window.location.origin}/result?quizID=${quizID}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" }
         });

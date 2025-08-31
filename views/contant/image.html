@@ -47,7 +47,7 @@
     // --- جلب الصورة ---
     async function getContant(courseID, imageId) {
       try {
-        const response = await fetch(`/${courseID}/${imageId}`, {
+        const response = await fetch(`${window.location.origin}/${courseID}/${imageId}`, {
           method: "GET",
           headers: {
             "content-Type": "application/json",
@@ -82,7 +82,7 @@
     getContant(courseId, imageId);
 
     // --- جلب قائمة المحتوى ---
-    fetch(`/${courseId}/contant`, {
+    fetch(`${window.location.origin}/${courseId}/contant`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`

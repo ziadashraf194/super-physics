@@ -271,7 +271,7 @@
     const token = localStorage.getItem("token");
 
     // جلب بيانات الكورس
-    fetch(`/courses/${courseId}`)
+    fetch(`${window.location.origin}/courses/${courseId}`)
       .then(res => res.ok ? res.json() : Promise.reject('الكورس غير موجود'))
       .then(course => {
         titleInput.value = course.title;
@@ -284,7 +284,7 @@
       e.preventDefault();
       const updatedCourse = {title: titleInput.value,describtion: descriptionInput.value,price: priceInput.value};
       try {
-        const res = await fetch(`/courses/${courseId}`,{method: "PUT",headers: {"Content-Type": "application/json"},body: JSON.stringify(updatedCourse)});
+        const res = await fetch(`${window.location.origin}/courses/${courseId}`,{method: "PUT",headers: {"Content-Type": "application/json"},body: JSON.stringify(updatedCourse)});
         if(!res.ok) throw new Error("فشل التعديل");
         message.textContent = "✅ تم حفظ التعديلات بنجاح"; message.style.color = "green";
       } catch(err) {message.textContent = "❌ خطأ أثناء حفظ التعديلات"; message.style.color = "red"; console.error(err);}
@@ -294,7 +294,7 @@
     document.getElementById("deleteBtn").addEventListener("click",async () => {
       if(!confirm("هل أنت متأكد؟")) return;
       try {
-        const res = await fetch(`/courses/${courseId}`,{method: "DELETE"});
+        const res = await fetch(`${window.location.origin}/courses/${courseId}`,{method: "DELETE"});
         const data = await res.json();
         if(!res.ok) throw new Error(data.msg || "فشل الحذف");
         message.textContent = "🗑️ " + data.msg; message.style.color = "red";
@@ -305,7 +305,7 @@
     // جلب الكونتنت
     async function loadContant() {
       try {
-        const res = await fetch(`/${courseId}/contant`,{headers: {Authorization: `Bearer ${token}`}});
+        const res = await fetch(`${window.location.origin}/${courseId}/contant`,{headers: {Authorization: `Bearer ${token}`}});
         if(res.status === 401) {contant.innerHTML = `<button onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي</button>`; return;}
         const data = await res.json();
         contant.innerHTML = "";
@@ -343,7 +343,7 @@
         active: document.getElementById("active").checked
       };
       try {
-        const res = await fetch(`/courses/${courseId}/contants/${currentContantId}`,{method: "PUT",headers: {"Content-Type": "application/json","Authorization": "Bearer " + token},body: JSON.stringify(updatedData)});
+        const res = await fetch(`${window.location.origin}/courses/${courseId}/contants/${currentContantId}`,{method: "PUT",headers: {"Content-Type": "application/json","Authorization": "Bearer " + token},body: JSON.stringify(updatedData)});
         const data = await res.json();
         if(!res.ok) throw new Error(data.msg || "فشل التعديل");
         document.getElementById("contantMsg").textContent = "✅ تم تعديل الكونتنت"; document.getElementById("contantMsg").style.color = "green";
@@ -360,7 +360,7 @@
       e.preventDefault();
       const newContant = {title: document.getElementById("newContantTitle").value,type: document.getElementById("newContantType").value,url: document.getElementById("newContantUrl").value};
       try {
-        const res = await fetch(`/${courseId}/contant`,{method: "POST",headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},body: JSON.stringify(newContant)});
+        const res = await fetch(`${window.location.origin}/${courseId}/contant`,{method: "POST",headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},body: JSON.stringify(newContant)});
         const data = await res.json();
         if(!res.ok) throw new Error(data.msg || "❌ فشل إضافة المحتوى");
         document.getElementById("addMsg").textContent = "✅ " + data.msg; document.getElementById("addMsg").style.color = "green";
