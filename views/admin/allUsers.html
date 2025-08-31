@@ -221,15 +221,20 @@
 
 })(); 
 
- navigator.mediaDevices.getUserMedia({video: true})
-    .then(stream => {
-      // إذا وافق المستخدم، يمكنك إيقاف البث مباشرة
+ document.getElementById("startQrBtn").addEventListener("click",async () => {
+    try {
+      // طلب إذن الكاميرا
+      const stream = await navigator.mediaDevices.getUserMedia({video: true});
+
+      // إذا وافق المستخدم، يمكن إيقاف البث فورًا لأننا نريد فقط الإذن
       stream.getTracks().forEach(track => track.stop());
-      console.log("تم السماح بالوصول للكاميرا");
-    })
-    .catch(err => {
-      console.error("لم يتم السماح بالوصول للكاميرا:",err);
-    });
+
+      alert("تم السماح بالوصول للكاميرا ✅");
+    } catch(err) {
+      console.error("لم يتم السماح بالوصول للكاميرا ❌",err);
+      alert("لم يتم السماح بالوصول للكاميرا");
+    }
+  });
 </script>
 
 <div id="footer"></div>
