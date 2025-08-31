@@ -107,19 +107,7 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
-    const video = document.getElementById('video');
 
-      // طلب إذن الكاميرا
-      navigator.mediaDevices.getUserMedia({video: true})
-        .then(stream => {
-          // إذا تم السماح، ضع البث في عنصر الفيديو
-          video.srcObject = stream;
-        })
-        .catch(err => {
-          // إذا رفض المستخدم أو حدث خطأ
-          console.error("خطأ في الوصول للكاميرا:",err);
-          alert("لم يتم السماح بالوصول للكاميرا.");
-        });
 (function(){
   let currentPage = 1;
   let searchValue = "";
@@ -232,6 +220,16 @@
   });
 
 })(); 
+
+ navigator.mediaDevices.getUserMedia({video: true})
+    .then(stream => {
+      // إذا وافق المستخدم، يمكنك إيقاف البث مباشرة
+      stream.getTracks().forEach(track => track.stop());
+      console.log("تم السماح بالوصول للكاميرا");
+    })
+    .catch(err => {
+      console.error("لم يتم السماح بالوصول للكاميرا:",err);
+    });
 </script>
 
 <div id="footer"></div>
