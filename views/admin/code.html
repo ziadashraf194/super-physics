@@ -473,13 +473,71 @@ async function createCoupons() {
 
     </script>
   
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  
   <script>
-    document.getElementById("exportBtn").addEventListener("click", function () {
-      const table = document.querySelector("table");
-      let workbook = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-      XLSX.writeFile(workbook, "table.xlsx");
+    document.getElementById("exportBtn").addEventListener("click",async function() {
+      const tableBody = document.getElementById("couponTable");
+      const rows = Array.from(tableBody.querySelectorAll("tr"));
+      if(rows.length === 0) {
+        alert("لا توجد أكواد للتصدير");
+        return;
+      }
+
+      try {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet("الأكواد");
+        sheet.columns = [
+          {header: "#",key: "id",width: 6},
+          {header: "الكود",key: "code",width: 30},
+          {header: "QR",key: "qr",width: 15},
+          {header: "تاريخ الانتهاء",key: "expiresAt",width: 18},
+          {header: "المرات المتبقية",key: "usageLimit",width: 15},
+          {header: "مرات الاستخدام",key: "usedCount",width: 12},
+          {header: "الحالة",key: "status",width: 12}
+        ];
+
+        sheet.getRow(1).font = {bold: true};
+
+        let currentRow = 2;
+        for(let i = 0; i < rows.length; i++) {
+          const cols = rows[i].children;
+          const id = (cols[0] && cols[0].innerText.trim()) || (i + 1);
+          const code = (cols[1] && cols[1].innerText.trim()) || "";
+          const expiresAt = (cols[2] && cols[2].innerText.trim()) || "";
+          const usageLimit = (cols[3] && cols[3].innerText.trim()) || "";
+          const usedCount = (cols[4] && cols[4].innerText.trim()) || "";
+          const status = (cols[5] && cols[5].innerText.trim()) || "";
+
+          sheet.addRow({id,code,expiresAt,usageLimit,usedCount,status});
+
+          try {
+            const dataUrl = await QRCode.toDataURL(code,{width: 120,margin: 1});
+            const base64 = dataUrl.split(",")[1];
+            const imageId = workbook.addImage({base64: base64,extension: "png"});
+            sheet.addImage(imageId,{
+              tl: {col: 2,row: currentRow - 1},
+              ext: {width: 80,height: 80}
+            });
+            sheet.getRow(currentRow).height = 60;
+          } catch(qrErr) {
+            console.error("فشل توليد QR لكود:",code,qrErr);
+          }
+
+          currentRow++;
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]),"coupons-with-qr.xlsx");
+      } catch(err) {
+        console.error("خطأ أثناء إنشاء الملف:",err);
+        alert("حدث خطأ أثناء إنشاء ملف الإكسل. افتح الكونسول للمزيد من التفاصيل.");
+      }
     });
   </script>
+
 
 </body>
 </html>

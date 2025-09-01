@@ -194,6 +194,16 @@
   outline: none;
   transform: scale(1.02);
 }
+.fa-qrcode {
+  display: flex;
+  position: absolute;
+  top: 36%;
+  left: 85%;
+  cursor: pointer;
+}
+#reader{
+margin-left: 40px !important;
+}
 
 /* ---- ميديا ---- */
 @media (max-width: 800px) {

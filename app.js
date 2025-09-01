@@ -65,7 +65,7 @@ app.post("/upload", upload.single("image"), (req, res) => {
 
 
 app.post("/api/register", async (req, res) => {
-  const { name, tel, grad, password, password2 } = req.body;
+  const { name, tel, grad, password, password2,center } = req.body;
 
  
   const egyptianPhoneRegex = /^01[0125][0-9]{8}$/;
@@ -101,7 +101,8 @@ app.post("/api/register", async (req, res) => {
     tel,
     grad,
     password: passwordHashed,
-    centerId
+    centerId,
+    center
   });
   
   await newUser.save();

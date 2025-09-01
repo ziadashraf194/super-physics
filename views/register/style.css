@@ -56,7 +56,7 @@ input[name="tel"] {
   width: 95%;
 
 }
-select[name="grad"] {
+select[name="grad"] ,select[name="center"]{
   width: 100%;
   height: 40px;
 

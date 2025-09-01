@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema({
   points: { type: Number, default: 0 },
   role: { type: String, default: "user" },
   Image: { type: String, default: "/uploads/userImage.svg" },
-
+  center: { type: String,enum: ["qena", "qeft", "qus","onLine"], default: "onLine" },
   month1: { type: MonthSchema, default: () => ({}) },
   month2: { type: MonthSchema, default: () => ({}) },
   month3: { type: MonthSchema, default: () => ({}) },

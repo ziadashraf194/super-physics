@@ -251,6 +251,10 @@
           <option value="image">🖼️ صورة</option>
         </select>
         <input type="text" id="newContantUrl" placeholder="رابط المحتوى" required>
+        <div style="display:flex; justify-content: space-between; align-items:center;">
+          <label>نشط</label>
+          <input type="checkbox" id="newContantActive">
+        </div>
         <button type="submit"><i class="fa-solid fa-plus"></i> إضافة</button>
       </form>
       <p id="addMsg"></p>
@@ -358,7 +362,12 @@
 
     document.getElementById("addContantForm").addEventListener("submit",async e => {
       e.preventDefault();
-      const newContant = {title: document.getElementById("newContantTitle").value,type: document.getElementById("newContantType").value,url: document.getElementById("newContantUrl").value};
+      const newContant = {
+        title: document.getElementById("newContantTitle").value,
+        type: document.getElementById("newContantType").value,
+        url: document.getElementById("newContantUrl").value,
+        active: document.getElementById("newContantActive").checked
+      };
       try {
         const res = await fetch(`${window.location.origin}/${courseId}/contant`,{method: "POST",headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},body: JSON.stringify(newContant)});
         const data = await res.json();

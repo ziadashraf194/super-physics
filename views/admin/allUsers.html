@@ -1,243 +1,445 @@
 <!DOCTYPE html>
 <html lang="ar">
+
 <head>
-<meta charset="UTF-8">
-<title>قائمة الطلاب</title>
-<style>
-  .students-container {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background:#f9fafb;
-    padding:30px;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-  }
+  <meta charset="UTF-8">
+  <title>قائمة الطلاب</title>
+  <style>
+    :root {
+      --brand: #0d6efd;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --card-w: 560px;
+      --card-h: 320px;
+      --radius: 18px;
+    }
 
-  .students-container h2 { 
-    text-align:center; 
-    margin-bottom:20px; 
-    color:#333; 
-  }
+    .name {
+      color: var(--brand);
+    }
 
-  .students-container .search-box { 
-    text-align:center; 
-    margin-bottom:20px; 
-  }
-  .students-container .search-box input { 
-    padding:8px; border-radius:6px; border:1px solid #ccc; width:250px; margin:0 5px; 
-  }
-  .students-container .search-box button { 
-    padding:8px 15px; border:none; border-radius:6px; cursor:pointer; transition:0.3s; color:#fff; 
-  }
-  .students-container .search-box button:hover { opacity:0.9; }
-  .students-container .search-box button#searchBtn { background:#28a745; }
-  .students-container .search-box button.clear { background:#dc3545; }
-  .students-container .search-box button.qr { background:#17a2b8; }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 24px;
+      color: var(--ink);
+      text-align: center;
+    }
 
-  .students-container table { 
-    width:100%; border-collapse:collapse; background:#fff; border-radius:12px; 
-    overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1); 
-    direction: rtl;
-  }
-  .students-container th, 
-  .students-container td { padding:12px 15px; text-align:center; }
-  .students-container th { background:#007bff; color:#fff; font-weight:600; font-size:15px; }
-  .students-container tr:nth-child(even) { background:#f2f6fc; }
-  .students-container tr:hover { background:#eaf1fb; transition:0.3s; cursor:pointer; }
+    .students-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  .students-container .pagination { margin-top:20px; text-align:center;display: flex;justify-content: center; }
-  .students-container button.page-btn { 
-    padding:10px 20px; margin:0 5px; border:none; border-radius:8px; cursor:pointer; 
-    background:#007bff; color:#fff; font-size:14px; transition:0.3s; 
-    align-self: center;
-  }
-  .students-container button.page-btn:hover:not(:disabled) { background:#0056b3; }
-  .students-container button.page-btn:disabled { background:#aaa; cursor:not-allowed; }
+    .search-box {
+      margin-bottom: 20px;
+    }
 
-  .students-container .loader { 
-    border: 6px solid #f3f3f3; border-top: 6px solid #007bff; border-radius: 50%; 
-    width: 50px; height: 50px; animation: spin 1s linear infinite; 
-    margin: 30px auto; display: none; 
-  }
-  @keyframes spin { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
-  }
+    .search-box input {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 250px;
+      margin-right: 5px;
+    }
 
-  .students-container #qr-reader { width:300px; margin:20px auto; display:none; }
-</style>
+    .search-box button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+      color: #fff;
+      margin-left: 5px;
+    }
+
+    .search-box button#searchBtn {
+      background: #28a745;
+    }
+
+    .search-box button.clear {
+      background: #dc3545;
+    }
+
+    .search-box button.qr {
+      background: #17a2b8;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      direction: rtl;
+    }
+
+    th,
+    td {
+      padding: 12px 15px;
+      text-align: center;
+    }
+
+    th {
+      background: var(--brand);
+      color: #fff;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    tr:nth-child(even) {
+      background: #f2f6fc;
+    }
+
+    tr:hover {
+      background: #eaf1fb;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+
+    .pagination {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .page-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--brand);
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .page-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+
+    .loader-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      color: var(--brand);
+      z-index: 1000;
+      display: none;
+    }
+
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--brand);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 15px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* بطاقة الطالب */
+    .student-card {
+      width: var(--card-w);
+      height: var(--card-h);
+      background: #fff;
+      border: 2px solid var(--brand);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(13, 110, 253, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      box-sizing: border-box;
+      direction: rtl;
+      flex-direction: row-reverse;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #e5e7eb;
+    }
+
+    .name {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .line {
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    .qr-box {
+      width: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .qr-caption {
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
 </head>
+
 <body>
-<div id="header"></div>
 
-<div class="students-container">
-  <h2>قائمة الطلاب </h2>
+  <div class="students-container">
+    <h2>قائمة الطلاب</h2>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="ابحث بالاسم أو centerId">
+      <button id="searchBtn">بحث</button>
+      <button class="clear" id="clearBtn">مسح البحث</button>
+      <button class="qr" id="startQrBtn">مسح QR</button>
+      <button class="btn" id="exportBtn">📥 تحميل PDF</button>
+    </div>
 
-  <div class="search-box">
-    <input type="text" id="searchInput" placeholder="ابحث بالاسم أو centerId">
-    <button id="searchBtn">بحث</button>
-    <button class="clear" id="clearBtn">مسح البحث</button>
-    <button class="qr" id="startQrBtn">مسح QR</button>
+    <div id="loaderOverlay" class="loader-overlay">
+      <div class="loader"></div>
+      <div id="loaderText">جاري التحميل...</div>
+      <div id="qr-reader" style="width:300px;height:300px;"></div>
+    </div>
+
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>centerId</th>
+          <th>الاسم</th>
+          <th>النقاط</th>
+        </tr>
+      </thead>
+      <tbody id="usersBody"></tbody>
+    </table>
+
+    <div class="pagination">
+      <button class="page-btn" id="prev">⬅ السابق</button>
+      <span id="pageNum"></span>
+      <button class="page-btn" id="next">التالي ➡</button>
+    </div>
   </div>
 
-  <div id="loader" class="loader"></div>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
-  <!-- QR Reader -->
-  <div id="qr-reader"></div>
+  <script>
+    (function() {
+      let currentPage = 1;
+      let searchValue = "";
 
-  <table id="usersTable">
-    <thead>
-      <tr>
-        <th>centerId</th>
-        <th>الاسم</th>
-        <th>النقاط</th>
-      </tr>
-    </thead>
-    <tbody id="usersBody"></tbody>
-  </table>
+      async function loadUsers(pageNum = 1) {
+        const loaderOverlay = document.getElementById("loaderOverlay");
+        const loaderText = document.getElementById("loaderText");
+        const tbody = document.getElementById("usersBody");
+        const usersTable = document.getElementById("usersTable");
 
-  <div class="pagination">
-    <button class="page-btn" id="prev">⬅ السابق</button>
-    <span id="pageNum"></span>
-    <button class="page-btn" id="next">التالي ➡</button>
-  </div>
-</div>
+        usersTable.style.display = "none";
+        loaderOverlay.style.display = "flex";
+        loaderText.innerText = "جاري التحميل...";
 
-<!-- مكتبة QR -->
-<script src="https://unpkg.com/html5-qrcode"></script>
+        tbody.innerHTML = "";
+        currentPage = pageNum;
 
-<script>
+        let name = "",centerId = "";
+        if(searchValue) {
+          if(/^\d+$/.test(searchValue)) centerId = searchValue;
+          else name = searchValue;
+        }
 
-(function(){
-  let currentPage = 1;
-  let searchValue = "";
-  let qrScanner;
+        try {
+          let url = `/users?page=${currentPage}`;
+          if(name) url += `&name=${encodeURIComponent(name)}`;
+          if(centerId) url += `&centerId=${encodeURIComponent(centerId)}`;
 
-  // دالة تحميل المستخدمين
-  async function loadUsers(pageNum = 1) {
-    const loader = document.getElementById("loader");
-    const usersBody = document.getElementById("usersBody");
+          const res = await fetch(url);
+          const data = await res.json();
 
-    try {
-      loader.style.display = "block";
-      usersBody.innerHTML = "";
-      currentPage = pageNum;
+          if(!data.users || data.users.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='3' style='color:red'>لا يوجد بيانات</td></tr>";
+          } else {
+            let count = 0;
+            for(const u of data.users) {
+              count++;
+              loaderText.innerText = `جاري التحميل... ${count} / ${data.users.length}`;
+              const tr = document.createElement("tr");
+              tr.innerHTML = `<td>${u.centerId || "غير محدد"}</td><td>${u.name}</td><td>${u.points}</td>`;
+              tr.addEventListener("click",() => window.location.href = "/admin/userData.html?id=" + u._id);
+              tbody.appendChild(tr);
+              await new Promise(r => setTimeout(r,50));
+            }
+          }
 
-      let name = "", centerId = "";
-      if (searchValue) {
-        if (/^\d+$/.test(searchValue)) centerId = searchValue;
-        else name = searchValue;
+          document.getElementById("pageNum").innerText = `صفحة ${data.page} من ${data.pages}`;
+          document.getElementById("prev").disabled = (data.page === 1);
+          document.getElementById("next").disabled = (data.page === data.pages);
+
+        } catch(err) {
+          tbody.innerHTML = "<tr><td colspan='3' style='color:red'>حدث خطأ</td></tr>";
+          console.error(err);
+        } finally {
+          loaderOverlay.style.display = "none";
+          usersTable.style.display = "table";
+        }
       }
 
-      const newUrl = new URL(window.location);
-      newUrl.searchParams.set("page", currentPage);
-      if(name) newUrl.searchParams.set("name", name); else newUrl.searchParams.delete("name");
-      if(centerId) newUrl.searchParams.set("centerId", centerId); else newUrl.searchParams.delete("centerId");
-      window.history.pushState({}, "", newUrl);
+      document.getElementById("prev").addEventListener("click",() => loadUsers(currentPage - 1));
+      document.getElementById("next").addEventListener("click",() => loadUsers(currentPage + 1));
 
-      let url = `/users?page=${currentPage}`;
-      if(name) url += `&name=${encodeURIComponent(name)}`;
-      if(centerId) url += `&centerId=${encodeURIComponent(centerId)}`;
+      document.getElementById("searchBtn").addEventListener("click",() => {
+        searchValue = document.getElementById("searchInput").value.trim();
+        loadUsers(1);
+      });
+      document.getElementById("clearBtn").addEventListener("click",() => {
+        document.getElementById("searchInput").value = "";
+        searchValue = "";
+        loadUsers(1);
+      });
 
-      const res = await fetch(url);
-      const data = await res.json();
-      loader.style.display = "none";
+      loadUsers();
 
-      if(data.users.length===0) {
-        usersBody.innerHTML = "<tr><td colspan='3'>لا يوجد بيانات</td></tr>";
-      } else {
-        data.users.forEach(u => {
-          let tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${u.centerId || "غير محدد"}</td>
-            <td>${u.name}</td>
-            <td>${u.points}</td>
-          `;
-          tr.addEventListener("click", ()=> {
-            window.location.href = "/admin/userData.html?id=" + u._id;
+      // تصدير PDF
+      document.getElementById("exportBtn").addEventListener("click",async () => {
+        const {jsPDF} = window.jspdf;
+        const doc = new jsPDF("p","pt","a4");
+        const res = await fetch(`/users?page=${currentPage}`);
+        const data = await res.json();
+
+        for(let i = 0; i < data.users.length; i++) {
+          const u = data.users[i];
+          const tempCard = document.createElement("div");
+          tempCard.className = "student-card";
+
+          const qrCanvas = document.createElement("canvas");
+          await QRCode.toCanvas(qrCanvas,`${window.location.origin}/admin/userData.html?id=${u._id}`,{
+            width: 140,
+            color: {dark: "#0d6efd",light: "#ffffff"}
           });
-          usersBody.appendChild(tr);
-        });
+          const qrData = qrCanvas.toDataURL("image/png");
+
+          tempCard.innerHTML = `
+          <div class="info">
+            <div class="name">${u.name}</div>
+            <div class="line">Center ID: ${u.centerId || "غير محدد"}</div>
+            <div class="line">الهاتف: ${u.tel}</div>
+            <div class="line">الصف: ${u.grad}</div>
+          </div>
+          <div class="qr-box">
+            <img class="qr-img" src="${qrData}" />
+            <div class="qr-caption">Scan QR</div>
+          </div>
+          `;
+
+          document.body.appendChild(tempCard);
+          const canvas = await html2canvas(tempCard,{scale: 2});
+          document.body.removeChild(tempCard);
+
+          const imgData = canvas.toDataURL("image/png");
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const imgWidth = pageWidth - 40;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          const y = (pageHeight - imgHeight) / 2;
+
+          doc.addImage(imgData,"PNG",20,y,imgWidth,imgHeight);
+          if(i < data.users.length - 1) doc.addPage();
+        }
+
+        doc.save("students.pdf");
+      });
+
+    })();
+
+    // ===== زر مسح QR =====
+    const startQrBtn = document.getElementById("startQrBtn");
+    let html5QrCode;
+    let qrScanning = false;
+
+    startQrBtn.addEventListener("click",async () => {
+      const overlay = document.getElementById("loaderOverlay");
+      const qrReaderDiv = document.getElementById("qr-reader");
+
+      if(qrScanning) {
+        html5QrCode.stop().then(() => {
+          qrScanning = false;
+          startQrBtn.innerText = "مسح QR";
+          overlay.style.display = "none";
+        }).catch(err => console.error(err));
+        return;
       }
 
-      document.getElementById("pageNum").innerText = `صفحة ${data.page} من ${data.pages}`;
-      document.getElementById("prev").disabled = (data.page===1);
-      document.getElementById("next").disabled = (data.page===data.pages);
-
-    } catch(err) {
-      loader.style.display = "none";
-      usersBody.innerHTML = "<tr><td colspan='3' style='color:red'>خطأ في جلب البيانات ❌</td></tr>";
-      console.error(err);
-    }
-  }
-
-  // أزرار pagination
-  document.getElementById("prev").addEventListener("click", ()=>loadUsers(currentPage-1));
-  document.getElementById("next").addEventListener("click", ()=>loadUsers(currentPage+1));
-
-  // البحث
-  document.getElementById("searchBtn").addEventListener("click", ()=>{
-    searchValue = document.getElementById("searchInput").value.trim();
-    loadUsers(1);
-  });
-
-  // مسح البحث
-  document.getElementById("clearBtn").addEventListener("click", ()=>{
-    document.getElementById("searchInput").value = "";
-    searchValue = "";
-    loadUsers(1);
-  });
-
-  // تحميل أول صفحة
-  const params = new URLSearchParams(window.location.search);
-  if(params.get("name")) searchValue = params.get("name");
-  else if(params.get("centerId")) searchValue = params.get("centerId");
-  loadUsers(Number(params.get("page"))||1);
-
-  // QR Scanner
-  document.getElementById("startQrBtn").addEventListener("click", ()=>{
-    const qrReaderDiv = document.getElementById("qr-reader");
-    qrReaderDiv.style.display = "block";
-
-    if(!qrScanner){
-      qrScanner = new Html5Qrcode("qr-reader");
-    }
-
-    qrScanner.start(
-      { facingMode: "environment" }, 
-      { fps: 10, qrbox: 250 },
-      (decodedText) => {
-        console.log("QR تم قراءته:", decodedText);
-        qrScanner.stop().then(() => {
-          qrReaderDiv.style.display = "none";
-          window.location.href = decodedText;
-        }).catch(err => console.error("خطأ عند إيقاف الكاميرا:", err));
-      },
-      (errorMessage) => {
-        console.warn(errorMessage);
+      if(!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
       }
-    );
-  });
 
-})(); 
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if(devices && devices.length) {
+          const cameraId = devices[0].id;
+          qrScanning = true;
+          startQrBtn.innerText = "إيقاف المسح";
+          overlay.style.display = "flex";
 
- document.getElementById("startQrBtn").addEventListener("click",async () => {
-    try {
-      // طلب إذن الكاميرا
-      const stream = await navigator.mediaDevices.getUserMedia({video: true});
-
-      // إذا وافق المستخدم، يمكن إيقاف البث فورًا لأننا نريد فقط الإذن
-      stream.getTracks().forEach(track => track.stop());
-
-      alert("تم السماح بالوصول للكاميرا ✅");
-    } catch(err) {
-      console.error("لم يتم السماح بالوصول للكاميرا ❌",err);
-      alert("لم يتم السماح بالوصول للكاميرا");
-    }
-  });
-</script>
-
-<div id="footer"></div>
-<script src="/header/header.js"></script>
+          html5QrCode.start(
+            cameraId,
+            {fps: 10,qrbox: 250},
+            (decodedText,decodedResult) => {
+              // بدلاً من alert، توجيه مباشرة للرابط
+              window.location.href = decodedText;
+              html5QrCode.stop().then(() => {
+                qrScanning = false;
+                startQrBtn.innerText = "مسح QR";
+                overlay.style.display = "none";
+              });
+            },
+            (errorMessage) => {
+              console.warn("QR Scan error:",errorMessage);
+            }
+          );
+        } else {
+          alert("لا توجد كاميرات متاحة.");
+        }
+      } catch(err) {
+        console.error(err);
+        alert("حدث خطأ أثناء الوصول للكاميرا.");
+      }
+    });
+  </script>
 </body>
+
 </html>

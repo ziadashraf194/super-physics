@@ -20,6 +20,13 @@
       <option value="الصف الثاني">الصف الثاني</option>
       <option value="الصف الثالث">الصف الثالث</option>
     </select><br/>
+    <select name="center" id="">
+      <option value="">اختر السنتر</option>
+      <option value="onLine">طالب اونلاين</option>
+      <option value="qena">سنتر قنا</option>
+      <option value="qus">سنتر قوص</option>
+      <option value="qeft">سنتر قفط</option>
+    </select><br />
     <input type="password" name="password" placeholder="كلمة المرور" required />
     <input type="password" name="password2" placeholder="تأكيد كلمة المرور" required /><br/>
     <h4></h4>
@@ -71,6 +78,7 @@
         grad: formData.get("grad"),
         password: formData.get("password"),
         password2: formData.get("password2"),
+        center: formData.get("center"),
       };
 
       try {
