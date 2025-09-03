@@ -177,14 +177,9 @@
           contant.innerHTML = `<h1 style="color:#000"> استني المحتوي هينزل قريب</h1>`
         }
         for(let item of contentArray) {
-          if(item.type == "video") {
-            icon = "fa-circle-play"
-          } else if(item.type == "pdf") {
-            icon = "fa-file-lines"
-          } else {
-            icon = "fa-image"
-          }
+      
           Sup().then(result => {
+              let icon = item.type === "video" ? "fa-circle-play" : item.type === "pdf" ? "fa-file-lines" : item.type === "image" ? "fa-image" : "fa-question";
             if(result === true) {
               contant.innerHTML += `
               <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
