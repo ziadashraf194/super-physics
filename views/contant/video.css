@@ -107,13 +107,22 @@
   }
 
     .div1 {
-        width: 86%;
-        height: 150px;
+        width: 88%;
+        height: 581px;
+        top: 9%;
     }
 
-.div2 {
-  width: 15%;
-  right: 7%;
-  bottom: 24%;
-}
+    .div2 {
+        width: 87%;
+        right: 6%;
+        bottom: 45%;
+    }
+     .div3 {
+        position: absolute;
+        width: 87%;
+        right: 6%;
+        bottom: 41%;
+        height: 60px;
+        z-index: 10000 !important;
+    }
 }
