@@ -64,18 +64,20 @@
 }
 
 .div1 {
-  height: 70px;
-  width: 63%;
-  top: 23%;
+
+  height: 175px;
+  width: 68%;
+  top: 25%;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .div2 {
-  height: 45px;
-  width: 12%;
-  bottom: 5%;
-  right: 18%;
+
+  height: 43px;
+  width: 10%;
+  bottom: 14%;
+  right: 16%;
 }
 
 /* Responsive */
@@ -85,16 +87,17 @@
     height: 40vh;
   }
 
-  .div1 {
-    width: 92%;
-    top: 20%;
-  }
+ .div1 {
+   width: 92%;
+   top: 20%;
+   height: 150px;
+ }
 
-  .div2 {
-    width: 20%;
-    bottom: 4%;
-    right: 4%;
-  }
+    .div2 {
+        width: 20%;
+        bottom: 34%;
+        right: 4%;
+    }
 }
 
 @media (min-width: 800px) and (max-width: 1200px) {
@@ -103,12 +106,14 @@
     height: 50vh;
   }
 
-  .div1 {
-    width: 85%;
-  }
+    .div1 {
+        width: 86%;
+        height: 150px;
+    }
 
-  .div2 {
-    width: 15%;
-    right: 7%;
-  }
+.div2 {
+  width: 15%;
+  right: 7%;
+  bottom: 24%;
+}
 }
