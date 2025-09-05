@@ -1067,7 +1067,7 @@ app.get("/", (req, res) => {
      res.sendFile(path.join(__dirname,  '404.html'));
    });
 
-const port = 443;
+const port = 3000;
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`server works on port ${port}`);
