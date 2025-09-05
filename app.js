@@ -1067,7 +1067,7 @@ app.get("/", (req, res) => {
      res.sendFile(path.join(__dirname,  '404.html'));
    });
 
-const port = 443;
+const port = 80;
 
 const https = require('https');
 const fs = require('fs');
@@ -1079,7 +1079,7 @@ const options = {
 };
 
 https.createServer(options, app).listen(port, () => {
-  console.log(`Server running on HTTPS port 443${port}`);
+  console.log(`Server running on HTTPS port ${port}`);
 });
 
 
