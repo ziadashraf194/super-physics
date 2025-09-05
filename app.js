@@ -1042,9 +1042,12 @@ app.get("/users", async (req, res) => {
 
                                     //==================Rank====================\\
 
- app.get("/rank", async (req, res) => {
+app.get("/rank", async (req, res) => {
   try {
-    const users = await User.find().sort({ points: -1 }).select();
+    // البحث عن المستخدمين الذين نقاطهم أكبر من صفر وترتيبهم تنازلياً
+    const users = await User.find({ points: { $gt: 0 } })
+                            .sort({ points: -1 })
+                            .select();
     res.json(users);
   } catch (err) {
     console.error(err);
