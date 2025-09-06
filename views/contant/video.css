@@ -64,21 +64,31 @@
 }
 
 .div1 {
-
+  background-color: red;
   height: 175px;
-  width: 68%;
-  top: 25%;
+  width: 100%;
+  top: -5%;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .div2 {
-
-  height: 43px;
-  width: 10%;
-  bottom: 14%;
-  right: 16%;
+  background-color: red;
+  height: 74px;
+  width: 15%;
+  bottom: -9%;
+  right: 0%;
 }
+.div3 {
+  background-color: red;
+  position: absolute;
+  height: 74px;
+  width: 100%;
+  bottom: 10%;
+  right: 0%;
+  z-index: 1000;
+}
+
 
 /* Responsive */
 @media (max-width: 800px) {
@@ -103,26 +113,26 @@
 @media (min-width: 800px) and (max-width: 1200px) {
   .video-box {
     max-width: 90%;
-    height: 50vh;
+    height: 450px;
   }
 
     .div1 {
-        width: 88%;
-        height: 581px;
-        top: 9%;
+        width: 101%;
+        height: 200px;
+        top: 0%;
     }
 
     .div2 {
-        width: 87%;
-        right: 6%;
-        bottom: 45%;
+        width: 101%;
+        right: 0;
+        bottom: -1.5%;
     }
-     .div3 {
+    .div3 {
         position: absolute;
-        width: 87%;
-        right: 6%;
-        bottom: 41%;
-        height: 60px;
+        width: 100%;
+        right: 0;
+        bottom: 18%;
+        height: 54px;
         z-index: 10000 !important;
     }
 }

@@ -45,6 +45,9 @@ async function getContant(courseID, vedioId) {
     }
 
     videoBox.innerHTML = `
+    <div class="div1"></div>
+    <div class="div2"></div>
+    <div class="div3"></div>
       <iframe 
         src="https://www.youtube.com/embed/${getYouTubeVideoId(data.contant.url)}" 
         title="YouTube video player" 
