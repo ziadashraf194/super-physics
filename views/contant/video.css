@@ -64,7 +64,6 @@
 }
 
 .div1 {
-  background-color: red;
   height: 175px;
   width: 100%;
   top: -5%;
@@ -73,14 +72,12 @@
 }
 
 .div2 {
-  background-color: red;
   height: 74px;
   width: 15%;
   bottom: -9%;
   right: 0%;
 }
 .div3 {
-  background-color: red;
   position: absolute;
   height: 74px;
   width: 100%;
