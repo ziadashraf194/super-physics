@@ -1077,20 +1077,20 @@ const https = require('https');
 const fs = require('fs');
 
 
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/superphysics.online/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/superphysics.online/fullchain.pem')
-};
+// const options = {
+//   key: fs.readFileSync('/etc/letsencrypt/live/superphysics.online/privkey.pem'),
+//   cert: fs.readFileSync('/etc/letsencrypt/live/superphysics.online/fullchain.pem')
+// };
 
-https.createServer(options, app).listen(port, () => {
-  console.log(`Server running on HTTPS port ${port}`);
-});
+// https.createServer(options, app).listen(port, () => {
+//   console.log(`Server running on HTTPS port ${port}`);
+// });
 
 
 
-// app.listen(4000,()=>{
-//   console.log(`Server running on HTTPS port ${4000}`)
-// })
+app.listen(4000,()=>{
+  console.log(`Server running on HTTPS port ${4000}`)
+})
 
 
 
