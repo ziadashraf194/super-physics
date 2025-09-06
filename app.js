@@ -415,36 +415,37 @@ app.get("/:courseID/contant", async (req, res) => {
     // نتأكد أن المستخدم مشترك في الكورس
     const isSubscribed = await Course.findOne({ _id: courseID, users: decoded._id || decoded.id });
 
-    // لو مشترك -> يرجع الكونتنت كامل مع الروابط
-    // لو مش مشترك -> يرجع الكونتنت بدون روابط
+    // populate مع الترتيب حسب createdAt (الأقدم أولاً)
     const course = isSubscribed
-      ? await Course.findById(courseID).populate("contant")
+      ? await Course.findById(courseID).populate({
+          path: "contant",
+          options: { sort: { createdAt: 1 } } // ✅ ترتيب بالأقدم
+        })
       : await Course.findById(courseID).populate({
           path: "contant",
-          select: "-url" // يخفي الرابط
+          select: "-url",
+          options: { sort: { createdAt: 1 } } // ✅ ترتيب بالأقدم
         });
 
     if (!course) {
       return res.status(404).json({ msg: "الكورس غير موجود" });
     }
-if (decoded.role=="admin") {
-   res.status(200).json({
-  contant: course.contant
-});
-  
-} else {
-  res.status(200).json({
-  contant: course.contant.filter(item => item.active === true)
-}); 
 
-} 
-
-
+    if (decoded.role == "admin") {
+      res.status(200).json({
+        contant: course.contant
+      });
+    } else {
+      res.status(200).json({
+        contant: course.contant.filter(item => item.active === true)
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "حدث خطأ أثناء جلب البيانات", error: error.message });
   }
 });
+
 app.get("/:courseID/:contantID", async (req, res) => {
   const { courseID, contantID } = req.params;
   const authHeader = req.headers.authorization;

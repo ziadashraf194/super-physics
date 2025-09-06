@@ -18,7 +18,8 @@ const contantSchema = new mongoose.Schema({
       right_answer: { type: String, required: true } ,
     }
   ]
-});
+}, { timestamps: { createdAt: true, updatedAt: false } } 
+);
 
 const Contant = mongoose.model("contant", contantSchema);
 

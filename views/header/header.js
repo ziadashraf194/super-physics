@@ -76,7 +76,7 @@ window.onload = async function () {
   // حقن الفوتر
   document.getElementById("footer").innerHTML = `
     <footer>
-      <h4>Developed by <span>Ziad Ashraf</span> 
+      <h4>Developed by <span>EPS</span> 
         <i class="fa-regular fa-heart fa-flip"></i>
       </h4>
     </footer>
