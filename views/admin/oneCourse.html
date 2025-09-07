@@ -307,19 +307,66 @@
     });
 
     // جلب الكونتنت
-    async function loadContant() {
+   async function loadContant() {
       try {
-        const res = await fetch(`${window.location.origin}/${courseId}/contant`,{headers: {Authorization: `Bearer ${token}`}});
-        if(res.status === 401) {contant.innerHTML = `<button onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي</button>`; return;}
+        const res = await fetch(`${window.location.origin}/${courseId}/contant`,{
+          headers: {Authorization: `Bearer ${token}`}
+        });
+
+        if(res.status === 401) {
+          contant.innerHTML = `<button onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي</button>`;
+          return;
+        }
+
         const data = await res.json();
         contant.innerHTML = "";
+
         data.contant.forEach(item => {
-          let icon = item.type === "video" ? "fa-circle-play" : item.type === "pdf" ? "fa-file-lines" : item.type === "image" ? "fa-image" : "fa-question";
-          contant.innerHTML += `<div class="contant-div" data-id="${item._id}" data-title="${item.title}" data-type="${item.type}" data-url="${item.url || ''}" data-active="${item.active}"><p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p></div>`;
+          let icon =
+            item.type === "video"
+              ? "fa-circle-play"
+              : item.type === "pdf"
+                ? "fa-file-lines"
+                : item.type === "image"
+                  ? "fa-image"
+                  : "fa-question";
+
+          // عنصر المحتوى + زرار الحذف
+          contant.innerHTML += `
+        <div class="contant-div" data-id="${item._id}">
+          <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
+          <button class="delete-btn" data-id="${item._id}">🗑 حذف</button>
+        </div>`;
         });
+
+        // اربط زرار الحذف لكل عنصر
+        document.querySelectorAll(".delete-btn").forEach(btn => {
+          btn.addEventListener("click",async e => {
+            const id = e.target.dataset.id;
+            try {
+              const res = await fetch(
+                `${window.location.origin}/courses/${courseId}/contants/${id}`,
+                {method: "DELETE"}
+              );
+              const result = await res.json();
+              if(!res.ok) throw new Error(result.msg || "فشل الحذف");
+
+              // حدث العرض بعد الحذف
+              e.target.closest(".contant-div").remove();
+            } catch(err) {
+              message.textContent = "❌ خطأ أثناء الحذف";
+              message.style.color = "red";
+              console.error(err);
+            }
+          });
+        });
+
         attachContantEvents();
-      } catch(err) {console.error(err);}
+      } catch(err) {
+        console.error(err);
+      }
     }
+
 
     let currentContantId = null;
     function attachContantEvents() {

@@ -177,8 +177,10 @@
           contant.innerHTML = `<h1 style="color:#000"> استني المحتوي هينزل قريب</h1>`
         }
         for(let item of contentArray) {
-      
+      contentArray.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+
           Sup().then(result => {
+            contentArray.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
               let icon = item.type === "video" ? "fa-circle-play" : item.type === "pdf" ? "fa-file-lines" : item.type === "image" ? "fa-image" : "fa-question";
             if(result === true) {
               contant.innerHTML += `
