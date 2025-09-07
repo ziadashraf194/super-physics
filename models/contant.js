@@ -8,6 +8,7 @@ const contantSchema = new mongoose.Schema({
   course: { type: mongoose.Schema.Types.ObjectId, ref: 'courses' } ,
   exam_duration: { type: Number, required: false },  
   active:{type:Boolean, default: true},
+    order: { type: Number, required: true },
   questions: [
     {
       title: { type: String, required: true },      

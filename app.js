@@ -377,19 +377,37 @@ app.put('/courses/:id', async (req, res) => {
     }
   });
                                     //==================contant====================\\
-app.post("/:courseID/contant",async (req,res)=>{
- let courseID =  req.params.courseID
- let courseID2 =  req.query.courseID
- try {
-  let newContant = new Contant(req.body)
-  await newContant.save()
-  await Course.findByIdAndUpdate(courseID|| courseID2, {
-    $addToSet: { contant: newContant._id }}) 
-  res.status(201).json({msg:"تم الحفظ بنجاح"})
- } catch (error) {
-  res.status(500).json({msg:"  حدث خطا"})
- }
-})
+app.post("/:courseID/contant", async (req, res) => {
+  let courseID = req.params.courseID || req.query.courseID;
+
+  try {
+    // هات آخر order في نفس الكورس
+    const lastContant = await Contant.findOne({ course: courseID })
+      .sort({ order: -1 })
+      .select("order");
+
+    const nextOrder = lastContant ? lastContant.order + 1 : 1;
+
+    // أنشئ الكونتنت الجديد بالـ order
+    let newContant = new Contant({
+      ...req.body,
+      course: courseID,
+      order: nextOrder,
+    });
+
+    await newContant.save();
+
+    await Course.findByIdAndUpdate(courseID, {
+      $addToSet: { contant: newContant._id },
+    });
+
+    res.status(201).json({ msg: "تم الحفظ بنجاح", contant: newContant });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "حدث خطأ", error: error.message });
+  }
+});
+
 app.get("/:courseID/contant", async (req, res) => {
   const courseID = req.params.courseID;
   const authHeader = req.headers.authorization;
@@ -413,18 +431,21 @@ app.get("/:courseID/contant", async (req, res) => {
 
   try {
     // نتأكد أن المستخدم مشترك في الكورس
-    const isSubscribed = await Course.findOne({ _id: courseID, users: decoded._id || decoded.id });
+    const isSubscribed = await Course.findOne({
+      _id: courseID,
+      users: decoded._id || decoded.id
+    });
 
-    // populate مع الترتيب حسب createdAt (الأقدم أولاً)
+    // نجيب الكورس مع المحتويات مرتبة حسب order
     const course = isSubscribed
       ? await Course.findById(courseID).populate({
           path: "contant",
-          options: { sort: { createdAt: 1 } } // ✅ ترتيب بالأقدم
+          options: { sort: { order: 1 } } // الترتيب بالأوردر (1 -> n)
         })
       : await Course.findById(courseID).populate({
           path: "contant",
           select: "-url",
-          options: { sort: { createdAt: 1 } } // ✅ ترتيب بالأقدم
+          options: { sort: { order: 1 } } // الترتيب بالأوردر
         });
 
     if (!course) {
@@ -442,7 +463,10 @@ app.get("/:courseID/contant", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: "حدث خطأ أثناء جلب البيانات", error: error.message });
+    res.status(500).json({
+      msg: "حدث خطأ أثناء جلب البيانات",
+      error: error.message
+    });
   }
 });
 
@@ -479,7 +503,7 @@ app.get("/:courseID/:contantID", async (req, res) => {
     }
 
     // هات الكورس مع المحتوى
-    const course = await Course.findById(courseID).populate("contant");
+    const course = await Course.findById(courseID).populate("contant")
 
     if (!course) {
       return res.status(404).json({ msg: "الكورس غير موجود" });

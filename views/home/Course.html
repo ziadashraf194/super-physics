@@ -166,39 +166,43 @@
     })
       .then(response => {
         if(response.status === 401) {
-          contant.innerHTML = ` <button id="popup-subscribe-btn" class="btn btn-primary btn-lg btn-block"onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي </button>`
+          contant.innerHTML = `<button id="popup-subscribe-btn" class="btn btn-primary btn-lg btn-block" onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي </button>`
         }
         if(!response.ok) throw new Error("حدث خطأ أثناء جلب البيانات");
         return response.json();
       })
       .then(data => {
-        const contentArray = data.contant;
-        if(contentArray.length == 0) {
-          contant.innerHTML = `<h1 style="color:#000"> استني المحتوي هينزل قريب</h1>`
-        }
-        for(let item of contentArray) {
-      contentArray.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+        let contentArray = data.contant;
 
-          Sup().then(result => {
-            contentArray.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
-              let icon = item.type === "video" ? "fa-circle-play" : item.type === "pdf" ? "fa-file-lines" : item.type === "image" ? "fa-image" : "fa-question";
+        if(contentArray.length == 0) {
+          contant.innerHTML = `<h1 style="color:#000"> استني المحتوي هينزل قريب</h1>`;
+          return;
+        }
+
+        // ✅ ترتيب مضمون
+        contentArray = contentArray.sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+        Sup().then(result => {
+          contentArray.forEach(item => {
+            let icon = item.type === "video" ? "fa-circle-play" : item.type === "pdf" ? "fa-file-lines" : item.type === "image" ? "fa-image" : "fa-question";
+
             if(result === true) {
               contant.innerHTML += `
-              <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
-                <p id="${item.type}">
-                  <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}</p>
-              </div>
-            `;
+                <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
+                  <p id="${item.type}">
+                    <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}</p>
+                </div>
+              `;
             } else {
               contant.innerHTML += `
-              <div class="contant-div" onclick="openPopup()">
-                <p id="${item.type}">
-                  <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}</p>
-              </div>
-            `;
+                <div class="contant-div" onclick="openPopup()">
+                  <p id="${item.type}">
+                    <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}</p>
+                </div>
+              `;
             }
           });
-        }
+        });
       })
       .catch(err => {});
 
