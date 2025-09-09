@@ -159,6 +159,9 @@ s0.parentNode.insertBefore(s1,s0);
 
   gtag('config', 'G-T8PBSEM8C9');
 </script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4611979987802126"
+     crossorigin="anonymous"></script>
   `;
 
   const regist = document.getElementById("regist");
