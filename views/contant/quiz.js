@@ -326,28 +326,76 @@ async function showResults(count) {
   try {
     const questionsObject = quizData.contant.questions;
     let totalScore = 0;
-    let results = [];
 
-    // حساب النتائج قبل مسح الإجابات
+    // حساب النقاط
     questionsObject.forEach((q, index) => {
       const correctAnswer = q.right_answer;
       const userAnswer = userAnswers[index] || null;
       if (userAnswer === correctAnswer) totalScore++;
-      results.push({
-        question: q.title,
-        answers: q.answers,
-        correctAnswer,
-        userAnswer,
-        isCorrect: userAnswer === correctAnswer
-      });
     });
 
-    // عرض النتيجة
-    let theResults = (totalScore === count) ? `<span class="perfect">ممتاز</span>, ${totalScore} من ${count}`
-                   : (totalScore >= count/2) ? `<span class="good">ناجح</span>, ${totalScore} من ${count}`
-                   : `<span class="bad">راسب</span>, ${totalScore} من ${count}`;
+    // عرض النتيجة العامة فقط
+    let theResults = (totalScore === count) 
+      ? `<span class="perfect">ممتاز</span>, ${totalScore} من ${count}`
+      : (totalScore >= count/2) 
+        ? `<span class="good">ناجح</span>, ${totalScore} من ${count}`
+        : `<span class="bad">راسب</span>, ${totalScore} من ${count}`;
 
     resultsContainer.innerHTML = `<h2>${quizData.contant.title}</h2>` + theResults;
+
+    // إذا showResult = true، اعرض التفاصيل
+    if (quizData.contant.showResult) {
+      const results = [];
+      questionsObject.forEach((q, index) => {
+        const correctAnswer = q.right_answer;
+        const userAnswer = userAnswers[index] || null;
+        const isCorrect = userAnswer === correctAnswer;
+        results.push({
+          question: q.title,
+          answers: {
+            answer_1: q.answer_1,
+            answer_2: q.answer_2,
+            answer_3: q.answer_3,
+            answer_4: q.answer_4
+          },
+          correctAnswer,
+          userAnswer,
+          isCorrect
+        });
+      });
+
+      const detailsDiv = document.createElement("div");
+      detailsDiv.className = "answers-details";
+
+      results.forEach((res, idx) => {
+        const qDiv = document.createElement("div");
+        qDiv.className = "question-result";
+
+        // صورة السؤال
+        const qImg = document.createElement("img");
+        qImg.src = res.question;
+        qImg.alt = `Question ${idx + 1}`;
+        qImg.className = "result-question-img";
+        qDiv.appendChild(qImg);
+
+        // إجابة الطالب
+        const userAnsText = res.userAnswer ? res.answers[res.userAnswer] : "لم يجب";
+        const userAns = document.createElement("p");
+        userAns.innerHTML = `إجابتك: <strong>${userAnsText}</strong>`;
+        userAns.className = res.isCorrect ? "correct" : "wrong";
+        qDiv.appendChild(userAns);
+
+        // الإجابة الصحيحة
+        const correctAns = document.createElement("p");
+        correctAns.innerHTML = `الإجابة الصحيحة: <strong>${res.answers[res.correctAnswer]}</strong>`;
+        correctAns.className = "correct-answer";
+        qDiv.appendChild(correctAns);
+
+        detailsDiv.appendChild(qDiv);
+      });
+
+      resultsContainer.appendChild(detailsDiv);
+    }
 
     // إرسال النتائج للسيرفر
     const response = await fetch(`${window.location.origin}/result?=${quizID}`, {
@@ -360,13 +408,12 @@ async function showResults(count) {
         studentId: userId,
         courseId,
         quizID,
-        results,
         score: totalScore
       })
     });
     await response.json();
 
-    // ✅ بعد عرض النتائج، نجعل الإجابات غير مجابة للمرة القادمة
+    // تصفير الإجابات بعد النهاية
     userAnswers = {};
     saveProgress();
 

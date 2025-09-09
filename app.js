@@ -9,12 +9,7 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, 'views')));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/imge", express.static(path.join(__dirname, "imge")));
-// mongoose.connect('mongodb+srv://c2a200cb7d:kgNj6g3k2ZNaZuVG@cluster0.h4edn7y.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
-// .then(()=>{
-//   console.log("mongo connected")
-// }).catch((err) => {
-//   console.error('Error:', err);
-// })   
+// mongoose.connect('mongodb+srv://zzz1942007_db_user:dDwGE9Eaz9OsFK1d@test.wjcyjmh.mongodb.net/?retryWrites=true&w=majority&appName=test') .then(()=>{ console.log("mongo connected tisting") }).catch((err) => { console.error('Error:', err); })   
 
 mongoose.connect('mongodb+srv://ziad1942007:ziad1942007@cluster0.ibid538.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
 .then(()=>{
@@ -32,6 +27,7 @@ Coupon = require("./models/Coupon")
 Counter = require("./models/Counter")
 quiz = require("./models/quiz")
 const result = require("./models/result")
+Lesson = require("./models/class")
 
 
 app.use(cors())
@@ -475,7 +471,7 @@ app.get("/:courseID/:contantID", async (req, res) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).sendFile(path.join(__dirname,  '404.html'));
+    return res.status(401).sendFile(path.join(__dirname, '404.html'));
   }
 
   const token = authHeader.split(" ")[1];
@@ -492,7 +488,7 @@ app.get("/:courseID/:contantID", async (req, res) => {
   }
 
   try {
-    // تحقق من الاشتراك
+    // ✅ تحقق من الاشتراك
     const isSubscribed = await Course.findOne({
       _id: courseID,
       users: decoded._id || decoded.id
@@ -502,30 +498,46 @@ app.get("/:courseID/:contantID", async (req, res) => {
       return res.status(401).json({ msg: "غير مشترك" });
     }
 
-    // هات الكورس مع المحتوى
-    const course = await Course.findById(courseID).populate("contant")
+    // ✅ هات الكورس بالـ lessons والـ contents
+    const course = await Course.findById(courseID).populate({
+      path: "lessons",
+      populate: {
+        path: "contents"
+      }
+    });
 
     if (!course) {
       return res.status(404).json({ msg: "الكورس غير موجود" });
     }
 
-    // دور على الـ contant المطلوب
-    const contant = course.contant.find(c => c._id.toString() === contantID);
+    // ✅ دور على الـ contant المطلوب
+    let foundContent = null;
+    for (const lesson of course.lessons) {
+      const content = lesson.contents.find(c => c._id.toString() === contantID);
+      if (content) {
+        foundContent = content;
+        break;
+      }
+    }
 
-    if (!contant) {
+    if (!foundContent) {
       return res.status(404).json({ msg: "المحتوى غير موجود" });
     }
 
-    res.status(200).json({ contant });
+    res.status(200).json({ contant: foundContent });
 
   } catch (error) {
     res.status(500).json({ msg: "حدث خطأ أثناء جلب البيانات", error: error.message });
   }
 });
-app.post("/:courseID/quiz", upload.array("images"), async (req, res) => {
-  const courseID = req.params.courseID;
+
+
+app.post("/lessons/:lessonId/quiz", upload.array("images"), async (req, res) => {
+  const { lessonId } = req.params;
 
   try {
+
+
     let questions = [];
     if (req.body.questions) {
       questions = JSON.parse(req.body.questions);
@@ -538,27 +550,35 @@ app.post("/:courseID/quiz", upload.array("images"), async (req, res) => {
       }));
     }
 
-    const newContant = new Contant({
+    // ✅ حساب ترتيب جديد
+    const lastContent = await Contant.findOne({ lesson: lessonId }).sort({ order: -1 });
+    const nextOrder = lastContent ? lastContent.order + 1 : 1;
+
+    const newContent = new Contant({
       title: req.body.title,
       type: req.body.type,
       exam_duration: req.body.exam_duration,
-      course: courseID,
       questions,
+      lesson: lessonId,
+      order: nextOrder,
+      showResult: req.body.showResult
     });
 
-    await newContant.save();
+    await newContent.save();
 
-    await Course.findByIdAndUpdate(courseID, {
-      $addToSet: { contant: newContant._id },
+    // اربط المحتوى بالدرس
+    await Lesson.findByIdAndUpdate(lessonId, {
+      $push: { contents: newContent._id },
     });
 
-    res.status(201).json({ msg: "✅ تم الحفظ بنجاح", contant: newContant });
-
+    res.status(201).json({ msg: "✅ تم حفظ الكويز بنجاح", content: newContent });
   } catch (error) {
-    console.error("❌ خطأ أثناء الإضافة:", error);
+    console.error("❌ خطأ أثناء إضافة الكويز:", error);
     res.status(500).json({ msg: "حدث خطأ أثناء الإضافة", error: error.message });
   }
 });
+
+
 
 app.get("/quizzes", async (req, res) => {
   const authHeader = req.headers.authorization;
@@ -646,36 +666,37 @@ app.get("/quiz/:quizId", async (req, res) => {
 app.put("/courses/:courseID/contants/:contantID", async (req, res) => {
   try {
     const contantID = req.params.contantID;
-
-    //  console.log("📌 contantID:", contantID);
-    //  console.log("📌 body:", req.body);
-
     const contant = await Contant.findById(contantID);
     if (!contant) {
       return res.status(404).json({ msg: "المحتوى غير موجود" });
     }
 
+    // تحديث الحقول الأساسية فقط إذا موجودة في req.body
     if (req.body.title !== undefined) contant.title = req.body.title;
     if (req.body.type !== undefined) contant.type = req.body.type;
     if (req.body.url !== undefined) contant.url = req.body.url;
     if (req.body.duration !== undefined) contant.duration = req.body.duration;
     if (req.body.active !== undefined) contant.active = req.body.active;
     if (req.body.exam_duration !== undefined) contant.exam_duration = req.body.exam_duration;
-    if (req.body.questions !== undefined) {
-      // فلتر الأسئلة الفارغة
-      let filteredQuestions = req.body.questions.filter(q =>
-        q.title && q.answer_1 && q.answer_2 && q.answer_3 && q.answer_4
-      );
-    
-      // إزالة _id الغير صالح
-      filteredQuestions = filteredQuestions.map(q => {
-        if (!mongoose.Types.ObjectId.isValid(q._id)) delete q._id;
-        return q;
-      });
-    
-      contant.questions = filteredQuestions;
+
+    // تحديث showResult إذا موجود
+    if (req.body.showResult !== undefined) contant.showResult = req.body.showResult;
+
+    // تحديث الأسئلة فقط إذا تم تمرير مصفوفة جديدة
+    if (Array.isArray(req.body.questions)) {
+      let filteredQuestions = req.body.questions
+        .filter(q => q.title && q.answer_1 && q.answer_2 && q.answer_3 && q.answer_4)
+        .map(q => {
+          if (!mongoose.Types.ObjectId.isValid(q._id)) delete q._id;
+          return q;
+        });
+
+      if (filteredQuestions.length > 0) {
+        contant.questions = filteredQuestions;
+      }
+      // إذا كانت المصفوفة فارغة، نترك الأسئلة القديمة كما هي
     }
-    
+
     await contant.save();
 
     res.json({ msg: "✅ تم تعديل المحتوى", contant });
@@ -684,6 +705,7 @@ app.put("/courses/:courseID/contants/:contantID", async (req, res) => {
     res.status(500).json({ msg: "حدث خطأ أثناء التعديل", error: err.message });
   }
 });
+
 app.delete("/courses/:courseID/contants/:contantID", async (req, res) => {
   try {
     const  contantID  = req.params.contantID;
@@ -1083,6 +1105,92 @@ app.get("/rank", async (req, res) => {
   
 
 
+app.post("/courses/:courseId/lessons", async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { title, description } = req.body;
+
+    const lastLesson = await Lesson.findOne({ course: courseId }).sort({ order: -1 });
+    const nextOrder = lastLesson ? lastLesson.order + 1 : 1;
+
+    const newLesson = new Lesson({ title, description, order: nextOrder, course: courseId });
+    await newLesson.save();
+
+    await Course.findByIdAndUpdate(courseId, { $push: { lessons: newLesson._id } });
+
+    res.status(201).json({ msg: "تم إضافة الدرس", lesson: newLesson });
+  } catch (err) {
+    res.status(500).json({ msg: "خطأ في إضافة الدرس", error: err.message });
+  }
+});
+app.post("/lessons/:lessonId/contents", async (req, res) => {
+  try {
+    const { lessonId } = req.params;
+
+    const lastContent = await Contant.findOne({ lesson: lessonId }).sort({ order: -1 });
+    const nextOrder = lastContent ? lastContent.order + 1 : 1;
+
+    const newContent = new Contant({ ...req.body, lesson: lessonId, order: nextOrder });
+    await newContent.save();
+
+    await Lesson.findByIdAndUpdate(lessonId, { $push: { contents: newContent._id } });
+
+    res.status(201).json({ msg: "تم إضافة المحتوى", content: newContent });
+  } catch (err) {
+    res.status(500).json({ msg: "خطأ في إضافة المحتوى", error: err.message });
+  }
+});
+app.get("/courses/:id/full", async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+      .populate({
+        path: "lessons",
+        options: { sort: { order: 1 } },
+        populate: {
+          path: "contents",
+          options: { sort: { order: 1 } }
+        }
+      });
+
+    if (!course) return res.status(404).json({ msg: "الكورس غير موجود" });
+
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ msg: "خطأ في جلب الكورس", error: err.message });
+  }
+});
+app.put("/:courseId/lessons/:lessonId", async (req, res) => {
+  try {
+    const { courseId, lessonId } = req.params;
+    const { title, description } = req.body;
+
+
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      console.log("❌ الكورس غير موجود");
+      return res.status(404).json({ msg: "الكورس غير موجود" });
+    }
+
+    const lesson = await Lesson.findOneAndUpdate(
+      { _id: lessonId, course: courseId },
+      { $set: { title, description } },
+      { new: true }
+    );
+
+    if (!lesson) {
+      console.log("❌ الدرس غير موجود");
+      return res.status(404).json({ msg: "الدرس غير موجود" });
+    }
+
+    console.log("✅ الدرس المعدل:", lesson);
+    res.json({ msg: "✅ تم تعديل الدرس بنجاح", lesson });
+  } catch (err) {
+    console.error("❌ خطأ في السيرفر:", err.message);
+    console.error(err.stack);
+    res.status(500).json({ msg: "❌ خطأ في السيرفر", error: err.message });
+  }
+});
 
 
 

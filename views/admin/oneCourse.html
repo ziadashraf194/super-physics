@@ -73,6 +73,10 @@
       cursor: pointer;
       transition: 0.3s;
       font-weight: bold;
+      margin-right: 20px;
+    }
+    .contant-div button {
+       margin-right: 20px !important;
     }
 
     button:hover {
@@ -261,67 +265,173 @@
     </div>
   </div>
 
+<!-- مودال إضافة درس -->
+<div id="addLessonModal" class="modal">
+  <div class="modal-content">
+    <span class="closeModal">✖</span>
+    <h3>➕ إضافة درس جديد</h3>
+    <form id="addLessonForm">
+      <input type="text" id="lessonTitle" placeholder="عنوان الدرس" required>
+      <textarea id="lessonDescription" placeholder="وصف الدرس"></textarea>
+      <button type="submit">إضافة</button>
+    </form>
+    <p id="lessonMsg"></p>
+  </div>
+</div>
+
+<!-- مودال إضافة محتوى -->
+<div id="addContentModal" class="modal">
+  <div class="modal-content">
+    <span class="closeModal">✖</span>
+    <h3>➕ إضافة محتوى</h3>
+    <form id="addContentForm">
+      <input type="hidden" id="addContentLessonId">
+      <input type="text" id="newContentTitle" placeholder="عنوان المحتوى" required>
+      <select id="newContentType" required>
+        <option value="video">🎬 فيديو</option>
+        <option value="pdf">📄 PDF</option>
+        <option value="image">🖼 صورة</option>
+      </select>
+      <input type="text" id="newContentUrl" placeholder="رابط المحتوى" required>
+      <button type="submit">إضافة</button>
+    </form>
+    <p id="contentMsg"></p>
+  </div>
+</div>
+
+<!-- مودال تعديل المحتوى -->
+<div id="editContentModal" class="modal">
+  <div class="modal-content">
+    <span class="closeModal">✖</span>
+    <h3>✏️ تعديل محتوى</h3>
+    <form id="editContentForm">
+      <input type="hidden" id="editContentId">
+      <input type="text" id="editContentTitle" placeholder="عنوان المحتوى" required>
+      <select id="editContentType" required>
+        <option value="video">🎬 فيديو</option>
+        <option value="pdf">📄 PDF</option>
+        <option value="image">🖼 صورة</option>
+      </select>
+      <input type="text" id="editContentUrl" placeholder="رابط المحتوى" required>
+      <button type="submit">حفظ التعديل</button>
+    </form>
+    <p id="editContentMsg"></p>
+  </div>
+</div>
+
+<!-- مودال تعديل الدرس -->
+<div id="editLessonModal" class="modal">
+  <div class="modal-content">
+    <span class="closeModal">✖</span>
+    <h3>✏️ تعديل الدرس</h3>
+    <form id="editLessonForm">
+      <input type="hidden" id="editLessonId">
+      <input type="text" id="editLessonTitle" placeholder="عنوان الدرس" required>
+      <textarea id="editLessonDescription" placeholder="وصف الدرس"></textarea>
+      <button type="submit">حفظ التعديل</button>
+    </form>
+    <p id="editLessonMsg"></p>
+  </div>
+</div>
+
+
   <div id="footer"></div>
 
   <script src="/header/header.js"></script>
-  <script>
-    const titleInput = document.getElementById("title");
-    const descriptionInput = document.getElementById("description");
-    const priceInput = document.getElementById("price");
-    const message = document.getElementById("message");
-    const contant = document.querySelector(".contant");
-    const params = new URLSearchParams(window.location.search);
-    const courseId = params.get('id');
-    const token = localStorage.getItem("token");
+<script>
+  const titleInput = document.getElementById("title");
+  const descriptionInput = document.getElementById("description");
+  const priceInput = document.getElementById("price");
+  const message = document.getElementById("message");
+  const contant = document.querySelector(".contant");
+  const params = new URLSearchParams(window.location.search);
+  const courseId = params.get('id');
+  const token = localStorage.getItem("token");
 
-    // جلب بيانات الكورس
-    fetch(`${window.location.origin}/courses/${courseId}`)
-      .then(res => res.ok ? res.json() : Promise.reject('الكورس غير موجود'))
-      .then(course => {
-        titleInput.value = course.title;
-        descriptionInput.value = course.description;
-        priceInput.value = course.price;
-      }).catch(err => {message.textContent = "⚠️ حدث خطأ أثناء تحميل البيانات"; message.style.color = "red";});
-
-    // تعديل بيانات الكورس
-    document.getElementById("editCourseForm").addEventListener("submit",async e => {
-      e.preventDefault();
-      const updatedCourse = {title: titleInput.value,describtion: descriptionInput.value,price: priceInput.value};
-      try {
-        const res = await fetch(`${window.location.origin}/courses/${courseId}`,{method: "PUT",headers: {"Content-Type": "application/json"},body: JSON.stringify(updatedCourse)});
-        if(!res.ok) throw new Error("فشل التعديل");
-        message.textContent = "✅ تم حفظ التعديلات بنجاح"; message.style.color = "green";
-      } catch(err) {message.textContent = "❌ خطأ أثناء حفظ التعديلات"; message.style.color = "red"; console.error(err);}
+  // جلب بيانات الكورس
+  fetch(`${window.location.origin}/courses/${courseId}`)
+    .then(res => res.ok ? res.json() : Promise.reject('الكورس غير موجود'))
+    .then(course => {
+      titleInput.value = course.title;
+      descriptionInput.value = course.description;
+      priceInput.value = course.price;
+    }).catch(err => {
+      message.textContent = "⚠️ حدث خطأ أثناء تحميل البيانات";
+      message.style.color = "red";
     });
 
-    // حذف الكورس
-    document.getElementById("deleteBtn").addEventListener("click",async () => {
-      if(!confirm("هل أنت متأكد؟")) return;
-      try {
-        const res = await fetch(`${window.location.origin}/courses/${courseId}`,{method: "DELETE"});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.msg || "فشل الحذف");
-        message.textContent = "🗑️ " + data.msg; message.style.color = "red";
-        setTimeout(() => window.location.href = "/admin/courses.html",1500);
-      } catch(err) {message.textContent = "❌ خطأ أثناء الحذف"; message.style.color = "red"; console.error(err);}
-    });
+  // تعديل بيانات الكورس
+  document.getElementById("editCourseForm").addEventListener("submit",async e => {
+    e.preventDefault();
+    const updatedCourse = {
+      title: titleInput.value,
+      description: descriptionInput.value,
+      price: priceInput.value
+    };
+    try {
+      const res = await fetch(`${window.location.origin}/courses/${courseId}`,{
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(updatedCourse)
+      });
+      if(!res.ok) throw new Error("فشل التعديل");
+      message.textContent = "✅ تم حفظ التعديلات بنجاح";
+      message.style.color = "green";
+    } catch(err) {
+      message.textContent = "❌ خطأ أثناء حفظ التعديلات";
+      message.style.color = "red";
+      console.error(err);
+    }
+  });
 
-    // جلب الكونتنت
-   async function loadContant() {
-      try {
-        const res = await fetch(`${window.location.origin}/${courseId}/contant`,{
-          headers: {Authorization: `Bearer ${token}`}
-        });
+  // حذف الكورس
+  document.getElementById("deleteBtn").addEventListener("click",async () => {
+    if(!confirm("هل أنت متأكد؟")) return;
+    try {
+      const res = await fetch(`${window.location.origin}/courses/${courseId}`,{method: "DELETE"});
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.msg || "فشل الحذف");
+      message.textContent = "🗑️ " + data.msg;
+      message.style.color = "red";
+      setTimeout(() => window.location.href = "/admin/courses.html",1500);
+    } catch(err) {
+      message.textContent = "❌ خطأ أثناء الحذف";
+      message.style.color = "red";
+      console.error(err);
+    }
+  });
 
-        if(res.status === 401) {
-          contant.innerHTML = `<button onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي</button>`;
-          return;
-        }
+  // ✅ جلب الدروس + المحتوى
+  async function loadContant() {
+    try {
+      const res = await fetch(`${window.location.origin}/courses/${courseId}/full`,{
+        headers: {Authorization: `Bearer ${token}`}
+      });
 
-        const data = await res.json();
-        contant.innerHTML = "";
+      if(res.status === 401) {
+        contant.innerHTML = `<button onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي</button>`;
+        return;
+      }
 
-        data.contant.forEach(item => {
+      const course = await res.json();
+      contant.innerHTML = "";
+
+      course.lessons.forEach(lesson => {
+        const lessonDiv = document.createElement("div");
+        lessonDiv.classList.add("lesson-block");
+        lessonDiv.innerHTML = `
+          <h3>${lesson.title}</h3>
+          <button class="edit-lesson-btn" 
+            data-id="${lesson._id}" 
+            data-title="${lesson.title}" 
+            data-description="${lesson.description || ""}">✏️ تعديل الدرس</button>
+          <button class="add-content-btn" data-id="${lesson._id}">➕ إضافة محتوى</button>
+          <div class="lesson-contents"></div>
+        `;
+
+        const contentsDiv = lessonDiv.querySelector(".lesson-contents");
+
+        (lesson.contents || []).forEach(item => {
           let icon =
             item.type === "video"
               ? "fa-circle-play"
@@ -331,101 +441,219 @@
                   ? "fa-image"
                   : "fa-question";
 
-          // عنصر المحتوى + زرار الحذف
-          contant.innerHTML += `
-        <div class="contant-div" data-id="${item._id}">
-          <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
-          <button class="delete-btn" data-id="${item._id}">🗑 حذف</button>
-        </div>`;
+          contentsDiv.innerHTML += `
+            <div class="contant-div" data-id="${item._id}">
+              <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
+              <button class="edit-btn" 
+                data-id="${item._id}" 
+                data-title="${item.title}" 
+                data-type="${item.type}" 
+                data-url="${item.url}" 
+                data-active="${item.active}">✏️ تعديل</button>
+              <button class="delete-btn" data-id="${item._id}">🗑 حذف</button>
+            </div>`;
         });
 
-        // اربط زرار الحذف لكل عنصر
-        document.querySelectorAll(".delete-btn").forEach(btn => {
-          btn.addEventListener("click",async e => {
-            const id = e.target.dataset.id;
-            try {
-              const res = await fetch(
-                `${window.location.origin}/courses/${courseId}/contants/${id}`,
-                {method: "DELETE"}
-              );
-              const result = await res.json();
-              if(!res.ok) throw new Error(result.msg || "فشل الحذف");
-
-              // حدث العرض بعد الحذف
-              e.target.closest(".contant-div").remove();
-            } catch(err) {
-              message.textContent = "❌ خطأ أثناء الحذف";
-              message.style.color = "red";
-              console.error(err);
-            }
-          });
-        });
-
-        attachContantEvents();
-      } catch(err) {
-        console.error(err);
-      }
-    }
-
-
-    let currentContantId = null;
-    function attachContantEvents() {
-      document.querySelectorAll(".contant-div").forEach(div => {
-        div.onclick = () => {
-          currentContantId = div.dataset.id;
-          document.getElementById("contantTitle").value = div.dataset.title;
-          document.getElementById("contantType").value = div.dataset.type;
-          document.getElementById("contantUrl").value = div.dataset.url;
-          document.getElementById("active").checked = (div.dataset.active === "true");
-          document.getElementById("editContantModal").style.display = "flex";
-        };
+        contant.appendChild(lessonDiv);
       });
+
+      // ✅ فتح مودال إضافة محتوى
+      document.querySelectorAll(".add-content-btn").forEach(btn => {
+        btn.addEventListener("click",() => {
+          const lessonId = btn.dataset.id;
+          document.getElementById("addContentLessonId").value = lessonId;
+          document.getElementById("addContentModal").style.display = "flex";
+        });
+      });
+
+      // ✅ فتح مودال تعديل الدرس
+      document.querySelectorAll(".edit-lesson-btn").forEach(btn => {
+        btn.addEventListener("click",() => {
+          document.getElementById("editLessonId").value = btn.dataset.id;
+          document.getElementById("editLessonTitle").value = btn.dataset.title;
+          document.getElementById("editLessonDescription").value = btn.dataset.description;
+          document.getElementById("editLessonModal").style.display = "flex";
+        });
+      });
+
+      // ✅ فتح مودال تعديل المحتوى
+      document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click",() => {
+          document.getElementById("contantTitle").value = btn.dataset.title;
+          document.getElementById("contantType").value = btn.dataset.type;
+          document.getElementById("contantUrl").value = btn.dataset.url;
+          document.getElementById("active").checked = btn.dataset.active === "true";
+          document.getElementById("editContantModal").dataset.id = btn.dataset.id;
+          document.getElementById("editContantModal").style.display = "flex";
+        });
+      });
+
+      // ✅ الحذف مع مودال التأكيد
+      document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click",() => {
+          if(confirm("⚠️ هل أنت متأكد من حذف هذا المحتوى؟")) {
+            deleteContant(btn.dataset.id);
+          }
+        });
+      });
+
+    } catch(err) {
+      console.error(err);
     }
+  }
 
-    document.getElementById("closeModal").onclick = () => {document.getElementById("editContantModal").style.display = "none";};
+  // ✅ تعديل الدرس
+  document.getElementById("editLessonForm").addEventListener("submit",async e => {
+    e.preventDefault();
+    const lessonId = document.getElementById("editLessonId").value;
+    const title = document.getElementById("editLessonTitle").value;
+    const description = document.getElementById("editLessonDescription").value;
 
-    // تعديل الكونتنت
-    document.getElementById("editContantForm").addEventListener("submit",async e => {
-      e.preventDefault();
-      const updatedData = {
-        title: document.getElementById("contantTitle").value,
-        type: document.getElementById("contantType").value,
-        url: document.getElementById("contantUrl").value,
-        active: document.getElementById("active").checked
-      };
-      try {
-        const res = await fetch(`${window.location.origin}/courses/${courseId}/contants/${currentContantId}`,{method: "PUT",headers: {"Content-Type": "application/json","Authorization": "Bearer " + token},body: JSON.stringify(updatedData)});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.msg || "فشل التعديل");
-        document.getElementById("contantMsg").textContent = "✅ تم تعديل الكونتنت"; document.getElementById("contantMsg").style.color = "green";
-        loadContant();
-        setTimeout(() => document.getElementById("editContantModal").style.display = "none",1500);
-      } catch(err) {document.getElementById("contantMsg").textContent = "❌ خطأ أثناء التعديل"; document.getElementById("contantMsg").style.color = "red"; console.error(err);}
-    });
+    try {
+     fetch(`/${courseId}/lessons/${lessonId}`, {
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ title, description })
+})
+  .then(async (res) => {
 
-    // إضافة محتوى جديد
-    document.getElementById("openAddContantModal").onclick = () => {document.getElementById("addContantModal").style.display = "flex";};
-    document.getElementById("closeAddModal").onclick = () => {document.getElementById("addContantModal").style.display = "none";};
+    const text = await res.text(); // استقبل الرد كـ نص
 
-    document.getElementById("addContantForm").addEventListener("submit",async e => {
-      e.preventDefault();
-      const newContant = {
-        title: document.getElementById("newContantTitle").value,
-        type: document.getElementById("newContantType").value,
-        url: document.getElementById("newContantUrl").value,
-        active: document.getElementById("newContantActive").checked
-      };
-      try {
-        const res = await fetch(`${window.location.origin}/${courseId}/contant`,{method: "POST",headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},body: JSON.stringify(newContant)});
-        const data = await res.json();
-        if(!res.ok) throw new Error(data.msg || "❌ فشل إضافة المحتوى");
-        document.getElementById("addMsg").textContent = "✅ " + data.msg; document.getElementById("addMsg").style.color = "green";
-        loadContant(); e.target.reset();
-      } catch(err) {document.getElementById("addMsg").textContent = err.message; document.getElementById("addMsg").style.color = "red"; console.error(err);}
-    });
+    try {
+      const data = JSON.parse(text); // حاول تحوله JSON
+      return data;
+    } catch (e) {
+      console.error("❌ الرد مش JSON:", e.message);
+      throw new Error(text); // ارجع النص الخام للديباج
+    }
+  })
+  .then((data) => {
+    alert(data.msg);
+  })
+  .catch((err) => {
+    console.error("❌ Fetch Error:", err);
+  });
 
-    loadContant();
-  </script>
+    } catch(err) {
+      document.getElementById("editLessonMsg").textContent = "❌ " + err.message;
+      document.getElementById("editLessonMsg").style.color = "red";
+    }
+  });
+
+  // ✅ تعديل المحتوى
+  document.getElementById("editContantForm").addEventListener("submit",async e => {
+    e.preventDefault();
+    const contantId = document.getElementById("editContantModal").dataset.id;
+    const title = document.getElementById("contantTitle").value;
+    const type = document.getElementById("contantType").value;
+    const url = document.getElementById("contantUrl").value;
+    const active = document.getElementById("active").checked;
+
+    try {
+      const res = await fetch(`${window.location.origin}/courses/${courseId}/contants/${contantId}`,{
+        method: "PUT",
+        headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},
+        body: JSON.stringify({title,type,url,active})
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.msg || "فشل التعديل");
+      document.getElementById("contantMsg").textContent = "✅ " + data.msg;
+      document.getElementById("contantMsg").style.color = "green";
+      loadContant();
+      setTimeout(() => document.getElementById("editContantModal").style.display = "none",1500);
+    } catch(err) {
+      document.getElementById("contantMsg").textContent = "❌ " + err.message;
+      document.getElementById("contantMsg").style.color = "red";
+    }
+  });
+
+  // ✅ حذف المحتوى
+  async function deleteContant(contantId) {
+    try {
+      const res = await fetch(`${window.location.origin}/courses/${courseId}/contants/${contantId}`,{
+        method: "DELETE",
+        headers: {"Authorization": `Bearer ${token}`}
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.msg || "فشل الحذف");
+      alert(data.msg);
+      loadContant();
+    } catch(err) {
+      alert("❌ " + err.message);
+    }
+  }
+
+  // ✅ زر إضافة درس (يفتح المودال)
+  const addLessonBtn = document.createElement("button");
+  addLessonBtn.className = "action-btn";
+  addLessonBtn.innerHTML = `<i class="fa-solid fa-plus"></i> إضافة درس جديد`;
+  addLessonBtn.onclick = () => {
+    document.getElementById("addLessonModal").style.display = "flex";
+  };
+  document.body.insertBefore(addLessonBtn,contant);
+
+  // ✅ حدث إضافة الدرس
+  document.getElementById("addLessonForm").addEventListener("submit",async e => {
+    e.preventDefault();
+    const title = document.getElementById("lessonTitle").value;
+    const description = document.getElementById("lessonDescription").value;
+
+    try {
+      const res = await fetch(`${window.location.origin}/courses/${courseId}/lessons`,{
+        method: "POST",
+        headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},
+        body: JSON.stringify({title,description})
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.msg || "فشل إضافة الدرس");
+      document.getElementById("lessonMsg").textContent = "✅ " + data.msg;
+      document.getElementById("lessonMsg").style.color = "green";
+      loadContant();
+      setTimeout(() => document.getElementById("addLessonModal").style.display = "none",1500);
+    } catch(err) {
+      document.getElementById("lessonMsg").textContent = "❌ " + err.message;
+      document.getElementById("lessonMsg").style.color = "red";
+    }
+  });
+
+  // ✅ حدث إضافة المحتوى
+  document.getElementById("addContentForm").addEventListener("submit",async e => {
+    e.preventDefault();
+    const lessonId = document.getElementById("addContentLessonId").value;
+    const title = document.getElementById("newContentTitle").value;
+    const type = document.getElementById("newContentType").value;
+    const url = document.getElementById("newContentUrl").value;
+
+    try {
+      const res = await fetch(`${window.location.origin}/lessons/${lessonId}/contents`,{
+        method: "POST",
+        headers: {"Content-Type": "application/json","Authorization": `Bearer ${token}`},
+        body: JSON.stringify({title,type,url})
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.msg || "فشل إضافة المحتوى");
+      document.getElementById("contentMsg").textContent = "✅ " + data.msg;
+      document.getElementById("contentMsg").style.color = "green";
+      loadContant();
+      setTimeout(() => document.getElementById("addContentModal").style.display = "none",1500);
+    } catch(err) {
+      document.getElementById("contentMsg").textContent = "❌ " + err.message;
+      document.getElementById("contentMsg").style.color = "red";
+    }
+  });
+  
+
+  // إغلاق المودالات
+  document.querySelectorAll(".closeModal, .close, #closeAddModal").forEach(btn => {
+    btn.onclick = () => btn.closest(".modal").style.display = "none";
+  });
+
+  loadContant();
+</script>
+
+
 </body>
 
 </html>

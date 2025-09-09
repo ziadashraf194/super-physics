@@ -1,14 +1,13 @@
+// models/course.js
 const mongoose = require("mongoose");
 
 const courseSchema = new mongoose.Schema({
-  title: String,
+  title: { type: String, required: true },
   description: String,
   price: Number,
   image: String,
-  users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  contant:[{ type: mongoose.Schema.Types.ObjectId, ref: 'contant' }]
-});
+  users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  lessons: [{ type: mongoose.Schema.Types.ObjectId, ref: "lesson" }]
+}, { timestamps: true });
 
-const AddCourse = mongoose.model("courses", courseSchema);
-
-module.exports = AddCourse;
+module.exports = mongoose.model("course", courseSchema);

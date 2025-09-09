@@ -82,53 +82,92 @@
     getContant(courseId, imageId);
 
     // --- جلب قائمة المحتوى ---
-    fetch(`${window.location.origin}/${courseId}/contant`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-    .then(response => {
-      if (response.status === 401) {
-        contant.innerHTML = `
-          <button id="popup-subscribe-btn" class="btn btn-primary btn-lg btn-block"
-            onclick="window.location.href='/login/index.html'">
-            سجل الدخول لرؤية المحتوي
-          </button>
-        `;
-        return;
-      }
-      if (!response.ok) throw new Error("حدث خطأ أثناء جلب البيانات");
-      return response.json();
-    })
-    .then(data => {
-      const contantArray = data.contant;
-      for (let item of contantArray) {
-        if (!item.url) {
-          item.url = `/home/Course.html?id=${courseId}`;
-        }
+    // ✅ جلب المحتوى (الدروس + المحتويات)
+      fetch(`${window.location.origin}/courses/${courseId}/full`,{
+        method: "GET",
+        headers: {"Authorization": `Bearer ${token}`}
+      })
+        .then(response => {
+          if(response.status === 401) {
+            contant.innerHTML = `<button id="popup-subscribe-btn" class="btn btn-primary btn-lg btn-block" onclick="window.location.href='/login/index.html'">سجل الدخول لرؤية المحتوي </button>`;
+          }
+          if(!response.ok) throw new Error("حدث خطأ أثناء جلب البيانات");
+          return response.json();
+        })
+        .then(data => {
+          if(!data.lessons || data.lessons.length === 0) {
+            contant.innerHTML = `<h1 style="color:#000"> استني المحتوي هينزل قريب</h1>`;
+            return;
+          }
 
-        let icon = "fa-file";
-        if (item.type === "video") {
-          icon = "fa-circle-play";
-        } else if (item.type === "pdf") {
-          icon = "fa-file-lines";
-        } else if (item.type === "image") {
-          icon = "fa-image";
-        }
+          Sup().then(result => {
+            contant.innerHTML = ""; // تفريغ
 
-        contant.innerHTML += `
-          <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
-            <p id="${item.type}">
-              <i class="fa-solid ${icon} play-icon" style="color: #0088ff;"></i> | ${item.title}
-            </p>
-          </div>
-        `;
+            data.lessons.forEach((lesson,index) => {
+              const lessonId = `lesson-${index}`;
+              contant.innerHTML += `
+              <div class="lesson-block">
+                <h3 class="lesson-title" onclick="toggleLesson('${lessonId}')">
+                  📘 ${lesson.title}
+                  <i class="fa-solid fa-chevron-down"></i>
+                </h3>
+                <div id="${lessonId}" class="lesson-content" style="display:none;"></div>
+              </div>
+            `;
+
+              setTimeout(() => {
+                const lessonContentDiv = document.getElementById(lessonId);
+                lesson.contents.forEach(item => {
+                  let icon = item.type === "video" ? "fa-circle-play" :
+                    item.type === "pdf" ? "fa-file-lines" :
+                      item.type === "image" ? "fa-image" : "fa-question";
+
+                  if(result) {
+                    lessonContentDiv.innerHTML += `
+                    <div class="contant-div" onclick="window.location.href='/contant/${item.type}.html?course=${courseId}&id=${item._id}'">
+                      <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
+                    </div>
+                  `;
+                  } else {
+                    lessonContentDiv.innerHTML += `
+                    <div class="contant-div" onclick="openPopup()">
+                      <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
+                    </div>
+                  `;
+                  }
+                });
+              },100);
+            });
+          });
+        })
+        .catch(err => {
+          contant.innerHTML = `<p style="color:red;">${err.message}</p>`;
+        });
+
+      // ✅ دالة فتح/غلق الدرس
+      function toggleLesson(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === "none" ? "block" : "none");
       }
-    })
-    .catch(err => {
-      console.error("خطأ:", err.message);
-    });
+
+
+      document.addEventListener("DOMContentLoaded",() => {
+        const titles = document.querySelectorAll(".lesson-title");
+
+        titles.forEach(title => {
+          title.addEventListener("click",() => {
+            const content = title.nextElementSibling;
+
+            // التبديل بين الفتح والإغلاق
+            content.classList.toggle("open");
+          });
+        });
+      });
+
+
+
+    
+
   </script>
 </body>
 </html>
