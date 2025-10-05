@@ -1,10 +1,10 @@
-let express = require("express")
-let app = express()
-const jwt = require("jsonwebtoken");
-cors = require('cors')
-let mongoose = require("mongoose")
-const bcrypt = require("bcrypt");
-const SECRET = "uidspisdpsdi"
+// let express = require("express")
+// let app = express()
+// const jwt = require("jsonwebtoken");
+// cors = require('cors')
+// let mongoose = require("mongoose")
+// const bcrypt = require("bcrypt");
+// const SECRET = "uidspisdpsdi"
 const path = require('path');
 app.use(express.static(path.join(__dirname, 'views')));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
