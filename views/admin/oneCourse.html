@@ -336,7 +336,7 @@
 
 
   <div id="footer"></div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
   <script src="/header/header.js"></script>
 <script>
   const titleInput = document.getElementById("title");
@@ -416,46 +416,71 @@
       const course = await res.json();
       contant.innerHTML = "";
 
-      course.lessons.forEach(lesson => {
+     course.lessons.forEach(lesson => {
         const lessonDiv = document.createElement("div");
         lessonDiv.classList.add("lesson-block");
         lessonDiv.innerHTML = `
-          <h3>${lesson.title}</h3>
-          <button class="edit-lesson-btn" 
-            data-id="${lesson._id}" 
-            data-title="${lesson.title}" 
-            data-description="${lesson.description || ""}">✏️ تعديل الدرس</button>
-          <button class="add-content-btn" data-id="${lesson._id}">➕ إضافة محتوى</button>
-          <div class="lesson-contents"></div>
-        `;
+    <h3>${lesson.title}</h3>
+    <button class="edit-lesson-btn" 
+      data-id="${lesson._id}" 
+      data-title="${lesson.title}" 
+      data-description="${lesson.description || ""}">✏️ تعديل الدرس</button>
+    <button class="add-content-btn" data-id="${lesson._id}">➕ إضافة محتوى</button>
+    <div class="lesson-contents" id="lesson-${lesson._id}"></div>
+  `;
 
         const contentsDiv = lessonDiv.querySelector(".lesson-contents");
 
         (lesson.contents || []).forEach(item => {
           let icon =
-            item.type === "video"
-              ? "fa-circle-play"
-              : item.type === "pdf"
-                ? "fa-file-lines"
-                : item.type === "image"
-                  ? "fa-image"
-                  : "fa-question";
+            item.type === "video" ? "fa-circle-play" :
+              item.type === "pdf" ? "fa-file-lines" :
+                item.type === "image" ? "fa-image" :
+                  "fa-question";
 
           contentsDiv.innerHTML += `
-            <div class="contant-div" data-id="${item._id}">
-              <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
-              <button class="edit-btn" 
-                data-id="${item._id}" 
-                data-title="${item.title}" 
-                data-type="${item.type}" 
-                data-url="${item.url}" 
-                data-active="${item.active}">✏️ تعديل</button>
-              <button class="delete-btn" data-id="${item._id}">🗑 حذف</button>
-            </div>`;
+      <div class="contant-div" data-id="${item._id}">
+        <p><i class="fa-solid ${icon}" style="color:#0088ff;"></i> | ${item.title}</p>
+        <button class="edit-btn" 
+          data-id="${item._id}" 
+          data-title="${item.title}" 
+          data-type="${item.type}" 
+          data-url="${item.url}" 
+          data-active="${item.active}">✏️ تعديل</button>
+        <button class="delete-btn" data-id="${item._id}">🗑 حذف</button>
+      </div>`;
         });
 
         contant.appendChild(lessonDiv);
+
+        // ✅ تفعيل السحب والإفلات
+        new Sortable(contentsDiv,{
+          animation: 150,
+          handle: ".contant-div", // العنصر اللي ينفع يتسحب
+        onEnd: function(evt) {
+            const order = [...contentsDiv.querySelectorAll(".contant-div")].map((el,index) => ({
+              id: el.dataset.id,
+              order: index + 1
+            }));
+
+            console.log("🔄 الترتيب الجديد:",order);
+
+            fetch(`${window.location.origin}/lessons/${lesson._id}/reorder`,{
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+              },
+              body: JSON.stringify({order})
+            })
+              .then(res => res.json())
+              .then(data => console.log("✅ تم تحديث الترتيب:",data))
+              .catch(err => console.error("❌ خطأ:",err));
+          }
+
+        });
       });
+
 
       // ✅ فتح مودال إضافة محتوى
       document.querySelectorAll(".add-content-btn").forEach(btn => {
